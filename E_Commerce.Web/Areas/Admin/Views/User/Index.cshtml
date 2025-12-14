@@ -1,0 +1,292 @@
+@model List<E_Commerce.Dto.UserDto>
+@using System
+@{
+    ViewBag.Title = "Quản lý người dùng";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="card-title mb-0">
+                        <i class="bi bi-people me-2"></i>Quản lý người dùng
+                    </h4>
+                    <div>
+                        <span class="badge bg-primary">Tổng: @ViewBag.TotalCount người dùng</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Filter Form -->
+                    <div class="card mb-4 border-secondary">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="bi bi-funnel me-2"></i>Bộ lọc và Tìm kiếm
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            @using (Html.BeginForm("Index", "User", FormMethod.Get, new { @class = "row g-3", id = "filterForm" }))
+                            {
+                                <div class="col-md-6">
+                                    <label for="searchTerm" class="form-label">
+                                        <i class="bi bi-search me-1"></i>Tìm kiếm
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="searchTerm" 
+                                           name="searchTerm" 
+                                           value="@ViewBag.SearchTerm" 
+                                           placeholder="Email, tên, số điện thoại...">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="statusFilter" class="form-label">
+                                        <i class="bi bi-toggle-on me-1"></i>Trạng thái
+                                    </label>
+                                    <select class="form-select" id="statusFilter" name="statusFilter">
+                                        <option value="all" @(ViewBag.StatusFilter == "all" ? "selected" : "")>Tất cả</option>
+                                        <option value="active" @(ViewBag.StatusFilter == "active" ? "selected" : "")>Đang hoạt động</option>
+                                        <option value="inactive" @(ViewBag.StatusFilter == "inactive" ? "selected" : "")>Đã vô hiệu hóa</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="bi bi-search me-2"></i>Tìm kiếm
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Users Table -->
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Email</th>
+                                    <th>Họ tên</th>
+                                    <th>Số điện thoại</th>
+                                    <th class="text-center">Số đơn hàng</th>
+                                    <th class="text-center">Trạng thái</th>
+                                    <th>Ngày tạo</th>
+                                    <th class="text-center">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null && Model.Any())
+                                {
+                                    foreach (var user in Model)
+                                    {
+                                        var orderCount = ViewData[$"OrderCount_{user.Id}"] as int? ?? 0;
+                                        <tr>
+                                            <td>@user.Id</td>
+                                            <td>
+                                                <a href="@Url.Action("Details", "User", new { area = "Admin", id = user.Id })" class="text-decoration-none">
+                                                    @user.Email
+                                                </a>
+                                            </td>
+                                            <td>@(user.FullName ?? "N/A")</td>
+                                            <td>@(user.Phone ?? "N/A")</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-info">@orderCount</span>
+                                            </td>
+                                            <td class="text-center">
+                                                @if (user.IsActive)
+                                                {
+                                                    <span class="badge bg-success">Hoạt động</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Vô hiệu hóa</span>
+                                                }
+                                            </td>
+                                            <td>@user.CreatedDate.ToString("dd/MM/yyyy")</td>
+                                            <td class="text-center">
+                                                <div class="btn-group" role="group">
+                                                    <a href="@Url.Action("Details", "User", new { area = "Admin", id = user.Id })" 
+                                                       class="btn btn-sm btn-info" title="Xem chi tiết">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <button type="button" 
+                                                            class="btn btn-sm @(user.IsActive ? "btn-warning" : "btn-success") toggle-active-btn" 
+                                                            data-user-id="@user.Id"
+                                                            data-is-active="@user.IsActive.ToString().ToLower()"
+                                                            title="@(user.IsActive ? "Vô hiệu hóa" : "Kích hoạt")">
+                                                        <i class="bi bi-@(user.IsActive ? "x-circle" : "check-circle")"></i>
+                                                    </button>
+                                                    <button type="button" 
+                                                            class="btn btn-sm btn-danger delete-user-btn" 
+                                                            data-user-id="@user.Id"
+                                                            data-user-email="@user.Email"
+                                                            title="Xóa">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="8" class="text-center text-muted py-4">
+                                            <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                                            <p class="mt-2">Không tìm thấy người dùng nào</p>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    @if (ViewBag.TotalPages > 1)
+                    {
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center">
+                                @if (ViewBag.CurrentPage > 1)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("Index", "User", new { area = "Admin", page = ViewBag.CurrentPage - 1, searchTerm = ViewBag.SearchTerm, statusFilter = ViewBag.StatusFilter })">
+                                            <i class="bi bi-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                }
+                                
+                                @for (int i = Math.Max(1, ViewBag.CurrentPage - 2); i <= Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 2); i++)
+                                {
+                                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                        <a class="page-link" href="@Url.Action("Index", "User", new { area = "Admin", page = i, searchTerm = ViewBag.SearchTerm, statusFilter = ViewBag.StatusFilter })">
+                                            @i
+                                        </a>
+                                    </li>
+                                }
+                                
+                                @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("Index", "User", new { area = "Admin", page = ViewBag.CurrentPage + 1, searchTerm = ViewBag.SearchTerm, statusFilter = ViewBag.StatusFilter })">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="user-token" class="d-none">
+    @Html.AntiForgeryToken()
+</form>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            var token = $('#user-token input[name="__RequestVerificationToken"]').val();
+
+            // Configure toastr
+            toastr.options = {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-right",
+                timeOut: 3000
+            };
+
+            // Toggle active status
+            $(document).on('click', '.toggle-active-btn', function () {
+                var userId = $(this).data('user-id');
+                var $btn = $(this);
+                // Lấy giá trị từ data attribute (có thể là string "true"/"false" hoặc boolean)
+                var isActiveValue = $btn.attr('data-is-active');
+                var isActive = isActiveValue === 'true' || isActiveValue === true;
+                
+                // Nếu đang active (true) thì sẽ vô hiệu hóa, nếu đang inactive (false) thì sẽ kích hoạt
+                var action = isActive ? 'vô hiệu hóa' : 'kích hoạt';
+                var actionText = isActive ? 'Vô hiệu hóa' : 'Kích hoạt';
+                var iconType = isActive ? 'warning' : 'question';
+                
+                Swal.fire({
+                    title: 'Xác nhận',
+                    text: 'Bạn có chắc muốn ' + action + ' tài khoản này?',
+                    icon: iconType,
+                    showCancelButton: true,
+                    confirmButtonColor: isActive ? '#d33' : '#28a745',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: actionText,
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '@Url.Action("ToggleActive", "User", new { area = "Admin" })',
+                            type: 'POST',
+                            data: {
+                                id: userId,
+                                __RequestVerificationToken: token
+                            },
+                            success: function (response) {
+                                if (response.success) {
+                                    toastr.success(response.message);
+                                    setTimeout(function() {
+                                        location.reload();
+                                    }, 1000);
+                                } else {
+                                    toastr.error(response.message);
+                                }
+                            },
+                            error: function () {
+                                toastr.error('Có lỗi xảy ra, vui lòng thử lại!');
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Delete user
+            $(document).on('click', '.delete-user-btn', function () {
+                var userId = $(this).data('user-id');
+                var userEmail = $(this).data('user-email');
+                
+                Swal.fire({
+                    title: 'Xác nhận xóa',
+                    html: 'Bạn có chắc muốn xóa người dùng <strong>' + userEmail + '</strong>?<br><small class="text-danger">Lưu ý: Nếu người dùng có đơn hàng, tài khoản sẽ bị vô hiệu hóa thay vì xóa.</small>',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Xóa',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '@Url.Action("Delete", "User", new { area = "Admin" })',
+                            type: 'POST',
+                            data: {
+                                id: userId,
+                                __RequestVerificationToken: token
+                            },
+                            success: function (response) {
+                                if (response.success) {
+                                    toastr.success(response.message);
+                                    setTimeout(function() {
+                                        location.reload();
+                                    }, 1000);
+                                } else {
+                                    toastr.error(response.message);
+                                }
+                            },
+                            error: function () {
+                                toastr.error('Có lỗi xảy ra, vui lòng thử lại!');
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+}
+

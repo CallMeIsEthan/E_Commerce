@@ -1,0 +1,151 @@
+@{
+    Layout = null;
+    Response.StatusCode = 404;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - NovaStore</title>
+    <!-- Favicons -->
+    <link href="https://res.cloudinary.com/dyvkrlz5i/image/upload/v1765680853/u6fkwhf7l2grvijqgn9l.jpg" rel="icon" type="image/jpeg">
+    <link href="https://res.cloudinary.com/dyvkrlz5i/image/upload/v1765680853/u6fkwhf7l2grvijqgn9l.jpg" rel="apple-touch-icon">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.1/aos.css" rel="stylesheet" />
+    <style>
+        /* Mirror template classes from NiceShop */
+        body.page-404 {
+            font-family: 'Roboto','Montserrat','Poppins',sans-serif;
+            background: #f7f7f7;
+            color: #111;
+            min-height: 100vh;
+        }
+        .error-404 {
+            padding: 80px 0;
+            margin: 0 auto;
+        }
+        .error-404 .error-icon {
+            font-size: 5rem;
+            color: rgba(17, 17, 17, 0.8);
+        }
+        .error-404 .error-code {
+            font-size: clamp(6rem, 15vw, 12rem);
+            font-weight: 800;
+            color: rgba(17, 17, 17, 0.9);
+            line-height: 1;
+        }
+        .error-404 .error-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #111;
+        }
+        .error-404 .error-text {
+            font-size: 1.1rem;
+            color: rgba(17, 17, 17, 0.7);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .error-404 .search-box {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .error-404 .search-box .input-group {
+            border-radius: 50px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        .error-404 .search-box .form-control {
+            border: 1px solid rgba(0,0,0,0.1);
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            color: #111;
+            background-color: #fff;
+            border-radius: 50px;
+        }
+        .error-404 .search-box .form-control:focus {
+            box-shadow: none;
+            border-color: #111;
+        }
+        .error-404 .search-box .search-btn {
+            background-color: #111;
+            color: #fff;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .error-404 .search-box .search-btn:hover {
+            background-color: #000;
+        }
+        .error-404 .error-action .btn-primary {
+            padding: 0.75rem 2rem;
+            font-size: 1.1rem;
+            background-color: #111;
+            border: none;
+            color: #fff;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+        .error-404 .error-action .btn-primary:hover {
+            background-color: #000;
+            transform: translateY(-2px);
+        }
+        @@media (max-width: 768px) {
+            .error-404 { padding: 60px 0; }
+            .error-404 .error-code { font-size: clamp(4rem, 12vw, 8rem); }
+            .error-404 .error-title { font-size: 1.5rem; }
+            .error-404 .error-text { font-size: 1rem; padding: 0 20px; }
+            .error-404 .search-box { margin: 0 20px; }
+        }
+    </style>
+</head>
+<body class="page-404">
+    <main class="main">
+        <section id="error-404" class="error-404 section">
+            <div class="container" data-aos="fade-up" data-aos-delay="100">
+                <div class="text-center">
+                    <div class="error-icon mb-4" data-aos="zoom-in" data-aos-delay="200">
+                        <i class="bi bi-exclamation-circle"></i>
+                    </div>
+                    <h1 class="error-code mb-4" data-aos="fade-up" data-aos-delay="300">404</h1>
+                    <h2 class="error-title mb-3" data-aos="fade-up" data-aos-delay="400">Oops! Trang bạn tìm không tồn tại.</h2>
+                    <p class="error-text mb-4" data-aos="fade-up" data-aos-delay="500">
+                        Đường dẫn có thể đã bị thay đổi hoặc tạm thời không khả dụng.<br />
+                        Hãy thử tìm kiếm sản phẩm hoặc quay lại trang chủ.
+                    </p>
+
+                    <div class="search-box mb-4" data-aos="fade-up" data-aos-delay="600">
+                        <form class="search-form" action="@Url.Action("Index", "Product", new { area = "User" })" method="get">
+                            <div class="input-group">
+                                <input type="text" name="searchTerm" class="form-control" placeholder="Tìm sản phẩm..." aria-label="Search">
+                                <button class="btn search-btn" type="submit">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="error-action" data-aos="fade-up" data-aos-delay="700">
+                        <a href="@Url.Action("Index", "Home", new { area = "User" })" class="btn btn-primary">
+                            <i class="bi bi-arrow-left me-1"></i> Về trang chủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.1/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 600,
+            easing: 'ease-in-out',
+            once: true,
+            mirror: false
+        });
+    </script>
+</body>
+</html>
+

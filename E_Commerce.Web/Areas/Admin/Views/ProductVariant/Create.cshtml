@@ -1,0 +1,287 @@
+@model E_Commerce.Web.ViewModels.ProductVariantViewModel
+
+@{
+    ViewBag.Title = ViewBag.Title ?? "Tạo biến thể mới";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var productId = ViewBag.ProductId as int?;
+    var productName = ViewBag.ProductName as string ?? "Sản phẩm";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>Tạo biến thể mới
+                    </h4>
+                    <small class="text-muted">Sản phẩm: <strong>@productName</strong></small>
+                </div>
+                <div class="card-body">
+                    <form id="variantForm" method="post" action="@Url.Action("Create", "ProductVariant", new { productId = productId })" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="Price" class="form-label">Giá <span class="text-danger">*</span></label>
+                                            @{
+                                                var productPrice = ViewBag.ProductPrice as decimal? ?? Model.Price;
+                                            }
+                                            <input type="number" 
+                                                   id="Price" 
+                                                   name="Price" 
+                                                   class="form-control" 
+                                                   step="1000" 
+                                                   min="0" 
+                                                   value="@productPrice.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)" 
+                                                   readonly 
+                                                   style="background-color: #e9ecef; cursor: not-allowed;" />
+                                            <small class="form-text text-muted">
+                                                <i class="fas fa-info-circle"></i> Giá được lấy từ sản phẩm và không thể thay đổi
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="Stock" class="form-label">Số lượng tồn kho <span class="text-danger">*</span></label>
+                                            @Html.TextBoxFor(m => m.Stock, new { @class = "form-control", @type = "number", @min = "0", @required = "required" })
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="SKU" class="form-label">SKU</label>
+                                            @Html.TextBoxFor(m => m.SKU, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="Size" class="form-label">Kích thước</label>
+                                            @Html.TextBoxFor(m => m.Size, new { @class = "form-control", @placeholder = "Ví dụ: S, M, L, XL" })
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="ColorName" class="form-label">Tên màu</label>
+                                            @Html.TextBoxFor(m => m.ColorName, new { @class = "form-control", @placeholder = "Ví dụ: Đỏ, Xanh, Trắng" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="ColorCode" class="form-label">Mã màu (HEX)</label>
+                                            @Html.TextBoxFor(m => m.ColorCode, new { @class = "form-control", @placeholder = "#FF0000", @pattern = "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$" })
+                                            <small class="form-text text-muted">Ví dụ: #FF0000 (đỏ), #0000FF (xanh)</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="Pattern" class="form-label">Họa tiết</label>
+                                    @Html.TextBoxFor(m => m.Pattern, new { @class = "form-control", @placeholder = "Ví dụ: Kẻ sọc, Trơn, Hoa" })
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        @Html.CheckBoxFor(m => m.IsActive, new { @class = "form-check-input" })
+                                        <label class="form-check-label" for="IsActive">Kích hoạt</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <div class="form-check mb-3">
+                                        <input type="checkbox" class="form-check-input" id="UseProductImages" name="UseProductImages" value="true" />
+                                        <label class="form-check-label" for="UseProductImages">
+                                            <strong>Dùng ảnh sản phẩm</strong>
+                                        </label>
+                                        <small class="form-text text-muted d-block">Copy tất cả ảnh từ sản phẩm sang biến thể này</small>
+                                    </div>
+
+                                    <div id="imageUploadSection">
+                                        <label for="ProductImages" class="form-label">Ảnh biến thể</label>
+                                        <input type="file" id="ProductImages" name="ProductImages" class="form-control" accept="image/*" multiple />
+                                        <small class="form-text text-muted">
+                                            Có thể chọn nhiều ảnh (JPG, PNG, GIF, WEBP, tối đa 10MB/ảnh).<br>
+                                            <strong>Ảnh đầu tiên sẽ tự động là ảnh chính.</strong>
+                                        </small>
+                                        <div id="productImagesPreview" class="mt-2 row g-2"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Lưu biến thể
+                                </button>
+                                <a href="@Url.Action("Index", "ProductVariant", new { productId = productId })" class="btn btn-secondary">
+                                    <i class="fas fa-times me-2"></i>Hủy
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        /* Trạng thái loading cho nút submit */
+        .btn.is-loading {
+            pointer-events: none;
+            opacity: 0.85;
+        }
+        .btn.is-loading .spinner-border {
+            vertical-align: text-bottom;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.12/dist/jquery.validate.unobtrusive.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/toastr.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.css" rel="stylesheet" />
+
+    <script>
+        $(document).ready(function () {
+            // Xử lý checkbox "Dùng ảnh sản phẩm"
+            $('#UseProductImages').on('change', function () {
+                if ($(this).is(':checked')) {
+                    $('#imageUploadSection').hide();
+                } else {
+                    $('#imageUploadSection').show();
+                }
+            });
+
+            // Preview ảnh khi chọn nhiều file
+            $('#ProductImages').on('change', function (e) {
+                var files = e.target.files;
+                var previewContainer = $('#productImagesPreview');
+                previewContainer.empty();
+
+                if (files && files.length > 0) {
+                    for (var i = 0; i < files.length; i++) {
+                        (function (file, index) {
+                            var reader = new FileReader();
+                            reader.onload = function (e) {
+                                var col = $('<div class="col-6 col-md-4 mb-2" data-index="' + index + '"></div>');
+                                var imgWrapper = $('<div class="position-relative"></div>');
+                                var img = $('<img src="' + e.target.result + '" class="img-thumbnail" style="width: 100%; height: 100px; object-fit: cover;" />');
+                                
+                                // Đánh dấu ảnh đầu tiên là ảnh chính
+                                if (index === 0) {
+                                    var mainBadge = $('<span class="badge bg-primary position-absolute top-0 start-0 m-1" style="font-size: 10px;">Ảnh chính</span>');
+                                    imgWrapper.append(mainBadge);
+                                }
+                                
+                                var removeBtn = $('<button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 remove-image-btn" style="padding: 2px 6px; font-size: 10px;"><i class="fas fa-times"></i></button>');
+                                
+                                removeBtn.on('click', function () {
+                                    col.remove();
+                                    // Xóa file khỏi input
+                                    var dt = new DataTransfer();
+                                    var input = document.getElementById('ProductImages');
+                                    for (var j = 0; j < input.files.length; j++) {
+                                        if (j !== index) {
+                                            dt.items.add(input.files[j]);
+                                        }
+                                    }
+                                    input.files = dt.files;
+                                    $(input).trigger('change');
+                                });
+                                
+                                imgWrapper.append(img);
+                                imgWrapper.append(removeBtn);
+                                col.append(imgWrapper);
+                                previewContainer.append(col);
+                            };
+                            reader.readAsDataURL(file);
+                        })(files[i], i);
+                    }
+                }
+            });
+
+            // Xử lý submit form
+            var isSubmitting = false;
+            $('#variantForm').on('submit', function (e) {
+                e.preventDefault();
+
+                if (isSubmitting) {
+                    return false;
+                }
+
+                if (!$(this).valid()) {
+                    var errors = [];
+                    var validator = $(this).validate();
+                    if (validator && validator.errorList) {
+                        $.each(validator.errorList, function() {
+                            errors.push(this.message);
+                        });
+                    }
+                    if (errors.length > 0) {
+                        toastr.error(errors.join('<br>'));
+                    } else {
+                        toastr.error('Vui lòng kiểm tra lại thông tin đã nhập');
+                    }
+                    return false;
+                }
+
+                isSubmitting = true;
+                var submitBtn = $(this).find('button[type="submit"]');
+                var originalText = submitBtn.html();
+                submitBtn
+                    .prop('disabled', true)
+                    .addClass('is-loading')
+                    .html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Đang lưu...');
+
+                var formData = new FormData(this);
+
+                $.ajax({
+                    url: '@Url.Action("Create", "ProductVariant", new { productId = productId })',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response.success) {
+                            toastr.success(response.message || 'Tạo biến thể thành công');
+                            setTimeout(function () {
+                                if (response.redirectUrl) {
+                                    window.location.href = response.redirectUrl;
+                                } else {
+                                    window.location.href = '@Url.Action("Index", "ProductVariant", new { productId = productId })';
+                                }
+                            }, 1500);
+                        } else {
+                            toastr.error(response.message || 'Có lỗi xảy ra');
+                            isSubmitting = false;
+                            submitBtn.prop('disabled', false).removeClass('is-loading').html(originalText);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        var errorMessage = 'Có lỗi xảy ra khi tạo biến thể';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        toastr.error(errorMessage);
+                        isSubmitting = false;
+                        submitBtn.prop('disabled', false).removeClass('is-loading').html(originalText);
+                    }
+                });
+
+                return false;
+            });
+        });
+    </script>
+}
+

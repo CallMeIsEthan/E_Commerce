@@ -1,0 +1,231 @@
+@model E_Commerce.Web.ViewModels.ProductVariantViewModel
+
+@{
+    ViewBag.Title = ViewBag.Title ?? "Sửa biến thể";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var variantId = ViewBag.VariantId as int?;
+    var productId = ViewBag.ProductId as int?;
+    var productName = ViewBag.ProductName as string ?? "Sản phẩm";
+    var imageUrl = ViewBag.ImageUrl as string;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-edit me-2"></i>Sửa biến thể
+                    </h4>
+                    <small class="text-muted">Sản phẩm: <strong>@productName</strong></small>
+                </div>
+                <div class="card-body">
+                    <form id="variantForm" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="Price" class="form-label">Giá <span class="text-danger">*</span></label>
+                                            @{
+                                                var productPrice = ViewBag.ProductPrice as decimal? ?? Model.Price;
+                                            }
+                                            <input type="number" 
+                                                   id="Price" 
+                                                   name="Price" 
+                                                   class="form-control" 
+                                                   step="1000" 
+                                                   min="0" 
+                                                   value="@productPrice.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)" 
+                                                   readonly 
+                                                   style="background-color: #e9ecef; cursor: not-allowed;" />
+                                            <small class="form-text text-muted">
+                                                <i class="fas fa-info-circle"></i> Giá được lấy từ sản phẩm và không thể thay đổi
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="Stock" class="form-label">Số lượng tồn kho <span class="text-danger">*</span></label>
+                                            @Html.TextBoxFor(m => m.Stock, new { @class = "form-control", @type = "number", @min = "0", @required = "required" })
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="SKU" class="form-label">SKU</label>
+                                            @Html.TextBoxFor(m => m.SKU, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="Size" class="form-label">Kích thước</label>
+                                            @Html.TextBoxFor(m => m.Size, new { @class = "form-control", @placeholder = "Ví dụ: S, M, L, XL" })
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="ColorName" class="form-label">Tên màu</label>
+                                            @Html.TextBoxFor(m => m.ColorName, new { @class = "form-control", @placeholder = "Ví dụ: Đỏ, Xanh, Trắng" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="ColorCode" class="form-label">Mã màu (HEX)</label>
+                                            @Html.TextBoxFor(m => m.ColorCode, new { @class = "form-control", @placeholder = "#FF0000", @pattern = "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$" })
+                                            <small class="form-text text-muted">Ví dụ: #FF0000 (đỏ), #0000FF (xanh)</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="Pattern" class="form-label">Họa tiết</label>
+                                    @Html.TextBoxFor(m => m.Pattern, new { @class = "form-control", @placeholder = "Ví dụ: Kẻ sọc, Trơn, Hoa" })
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        @Html.CheckBoxFor(m => m.IsActive, new { @class = "form-check-input" })
+                                        <label class="form-check-label" for="IsActive">Kích hoạt</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="Image" class="form-label">Ảnh biến thể</label>
+                                    <input type="file" id="Image" name="Image" class="form-control" accept="image/*" />
+                                    <small class="form-text text-muted">Chấp nhận: JPG, PNG, GIF, WEBP (tối đa 10MB)</small>
+                                    @if (!string.IsNullOrEmpty(imageUrl))
+                                    {
+                                        <div class="mt-2">
+                                            <p class="text-muted mb-1">Ảnh hiện tại:</p>
+                                            <img src="@imageUrl" alt="Current" class="img-thumbnail" style="max-width: 200px; max-height: 200px; object-fit: cover;" />
+                                        </div>
+                                    }
+                                    <div id="imagePreview" class="mt-2" style="display: none;">
+                                        <p class="text-muted mb-1">Ảnh mới:</p>
+                                        <img id="previewImg" src="" alt="Preview" class="img-thumbnail" style="max-width: 200px; max-height: 200px; object-fit: cover;" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Cập nhật biến thể
+                                </button>
+                                <a href="@Url.Action("Index", "ProductVariant", new { productId = productId })" class="btn btn-secondary">
+                                    <i class="fas fa-times me-2"></i>Hủy
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.12/dist/jquery.validate.unobtrusive.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/toastr.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.css" rel="stylesheet" />
+
+    <script>
+        $(document).ready(function () {
+            // Preview ảnh khi chọn file
+            $('#Image').on('change', function (e) {
+                var file = e.target.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $('#previewImg').attr('src', e.target.result);
+                        $('#imagePreview').show();
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    $('#imagePreview').hide();
+                }
+            });
+
+            // Xử lý submit form
+            var isSubmitting = false;
+            $('#variantForm').on('submit', function (e) {
+                e.preventDefault();
+
+                if (isSubmitting) {
+                    return false;
+                }
+
+                if (!$(this).valid()) {
+                    var errors = [];
+                    var validator = $(this).validate();
+                    if (validator && validator.errorList) {
+                        $.each(validator.errorList, function() {
+                            errors.push(this.message);
+                        });
+                    }
+                    if (errors.length > 0) {
+                        toastr.error(errors.join('<br>'));
+                    } else {
+                        toastr.error('Vui lòng kiểm tra lại thông tin đã nhập');
+                    }
+                    return false;
+                }
+
+                isSubmitting = true;
+                var submitBtn = $(this).find('button[type="submit"]');
+                var originalText = submitBtn.html();
+                submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Đang lưu...');
+
+                var formData = new FormData(this);
+
+                $.ajax({
+                    url: '@Url.Action("Edit", "ProductVariant", new { id = variantId })',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response.success) {
+                            toastr.success(response.message || 'Cập nhật biến thể thành công');
+                            setTimeout(function () {
+                                if (response.redirectUrl) {
+                                    window.location.href = response.redirectUrl;
+                                } else {
+                                    window.location.href = '@Url.Action("Index", "ProductVariant", new { productId = productId })';
+                                }
+                            }, 1500);
+                        } else {
+                            toastr.error(response.message || 'Có lỗi xảy ra');
+                            isSubmitting = false;
+                            submitBtn.prop('disabled', false).html(originalText);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        var errorMessage = 'Có lỗi xảy ra khi cập nhật biến thể';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        toastr.error(errorMessage);
+                        isSubmitting = false;
+                        submitBtn.prop('disabled', false).html(originalText);
+                    }
+                });
+
+                return false;
+            });
+        });
+    </script>
+}
+

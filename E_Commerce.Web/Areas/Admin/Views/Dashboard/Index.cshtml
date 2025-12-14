@@ -1,0 +1,288 @@
+@model E_Commerce.Web.ViewModels.DashboardViewModel
+@{
+    ViewBag.Title = "Dashboard";
+}
+
+<div class="page-header mb-4">
+    <h1 class="page-title">Dashboard</h1>
+    <p class="text-muted">Tổng quan hệ thống</p>
+</div>
+
+<!-- Stats Cards -->
+<div class="row">
+    <div class="col-lg-3 col-md-6">
+        <div class="stats-card">
+            <div class="stats-card-icon">
+                <i class="bi bi-box-seam"></i>
+            </div>
+            <div class="stats-card-value">@(Model?.TotalProducts ?? 0)</div>
+            <div class="stats-card-label">Tổng sản phẩm</div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stats-card success">
+            <div class="stats-card-icon">
+                <i class="bi bi-cart-check"></i>
+            </div>
+            <div class="stats-card-value">@(Model?.TotalOrders ?? 0)</div>
+            <div class="stats-card-label">Tổng đơn hàng</div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stats-card warning">
+            <div class="stats-card-icon">
+                <i class="bi bi-people"></i>
+            </div>
+            <div class="stats-card-value">@(Model?.TotalUsers ?? 0)</div>
+            <div class="stats-card-label">Tổng người dùng</div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stats-card info">
+            <div class="stats-card-icon">
+                <i class="bi bi-currency-dollar"></i>
+            </div>
+            <div class="stats-card-value">@(Model?.TotalRevenue != null ? string.Format("{0:N0}", Model.TotalRevenue) : "0") đ</div>
+            <div class="stats-card-label">Tổng doanh thu</div>
+        </div>
+    </div>
+</div>
+
+<!-- Today / Revenue / Status -->
+<div class="row">
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-calendar-day me-2"></i>Hôm nay</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small">Đơn hàng</div>
+                        <div class="h4 mb-0">@(Model?.TodayOrders ?? 0)</div>
+                    </div>
+                    <div>
+                        <div class="text-muted small text-end">Doanh thu</div>
+                        <div class="h5 text-success mb-0">@(Model?.TodayRevenue != null ? string.Format("{0:N0}", Model.TodayRevenue) : "0") đ</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-bar-chart-line me-2"></i>Doanh thu</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-2 d-flex justify-content-between">
+                    <span>7 ngày qua</span>
+                    <strong>@(Model?.WeekRevenue != null ? string.Format("{0:N0}", Model.WeekRevenue) : "0") đ</strong>
+                </div>
+                <div class="mb-2 d-flex justify-content-between">
+                    <span>Tháng này</span>
+                    <strong>@(Model?.MonthRevenue != null ? string.Format("{0:N0}", Model.MonthRevenue) : "0") đ</strong>
+                </div>
+                <div class="text-muted small">Tổng: @(Model?.TotalRevenue != null ? string.Format("{0:N0}", Model.TotalRevenue) : "0") đ</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-exclamation-circle me-2"></i>Trạng thái đơn</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <span><i class="bi bi-clock-history text-warning me-2"></i>Chờ xác nhận</span>
+                    <span class="badge bg-warning text-dark">@Model.PendingOrders</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span><i class="bi bi-gear text-info me-2"></i>Đang xử lý</span>
+                    <span class="badge bg-info text-dark">@Model.ProcessingOrders</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span><i class="bi bi-check-circle text-success me-2"></i>Hoàn tất</span>
+                    <span class="badge bg-success">@Model.CompletedOrders</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span><i class="bi bi-x-circle text-danger me-2"></i>Đã hủy</span>
+                    <span class="badge bg-danger">@Model.CancelledOrders</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Orders -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Đơn hàng gần đây</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Mã đơn</th>
+                                <th>Khách hàng</th>
+                                <th>Sản phẩm</th>
+                                <th>Tổng tiền</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày tạo</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model?.RecentOrders != null && Model.RecentOrders.Any())
+                            {
+                                foreach (var o in Model.RecentOrders)
+                                {
+                                    <tr>
+                                        <td>@o.OrderNumber</td>
+                                        <td>@o.CustomerName</td>
+                                        <td>@o.TotalItems sản phẩm</td>
+                                        <td>@o.TotalAmount.ToString("N0") đ</td>
+                                        <td>
+                                            <span class="badge @GetStatusBadge(o.Status)">@GetStatusText(o.Status)</span>
+                                            <span class="badge @GetPaymentBadge(o.PaymentStatus)">@GetPaymentText(o.PaymentStatus)</span>
+                                        </td>
+                                        <td>@o.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>
+                                            <a href="@Url.Action("Confirm", "Order", new { area = "User", id = o.Id })" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted py-3">Chưa có dữ liệu</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Thao tác nhanh</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <a href="@Url.Action("Create", "Product", new { area = "Admin" })" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-plus-circle me-2"></i>Thêm sản phẩm
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="@Url.Action("Create", "Category", new { area = "Admin" })" class="btn btn-outline-success w-100">
+                            <i class="bi bi-tag me-2"></i>Thêm danh mục
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="@Url.Action("Create", "DiscountCode", new { area = "Admin" })" class="btn btn-outline-warning w-100">
+                            <i class="bi bi-ticket-perforated me-2"></i>Tạo mã giảm giá
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="@Url.Action("Index", "Report", new { area = "Admin" })" class="btn btn-outline-info w-100">
+                            <i class="bi bi-graph-up me-2"></i>Xem báo cáo
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetStatusBadge(string status)
+    {
+        switch ((status ?? "").ToLower())
+        {
+            case "pending": return "bg-warning text-dark";
+            case "processing": return "bg-info text-dark";
+            case "shipping": return "bg-primary";
+            case "delivered": return "bg-success";
+            case "completed": return "bg-dark";
+            case "cancelled": return "bg-danger";
+            default: return "bg-secondary";
+        }
+    }
+
+    string GetStatusText(string status)
+    {
+        switch ((status ?? "").ToLower())
+        {
+            case "pending": return "Chờ xác nhận";
+            case "processing": return "Đang xử lý";
+            case "shipping": return "Đang giao";
+            case "delivered": return "Đã giao";
+            case "completed": return "Hoàn tất";
+            case "cancelled": return "Đã hủy";
+            default: return status ?? "N/A";
+        }
+    }
+
+    string GetPaymentBadge(string status)
+    {
+        switch ((status ?? "").ToLower())
+        {
+            case "pending": return "bg-warning text-dark";
+            case "paid": return "bg-success";
+            case "failed": return "bg-danger";
+            case "refunded": return "bg-secondary";
+            default: return "bg-secondary";
+        }
+    }
+
+    string GetPaymentText(string status)
+    {
+        switch ((status ?? "").ToLower())
+        {
+            case "pending": return "Chưa thanh toán";
+            case "paid": return "Đã thanh toán";
+            case "failed": return "Thất bại";
+            case "refunded": return "Đã hoàn tiền";
+            default: return status ?? "N/A";
+        }
+    }
+}
+
+@section styles {
+    <style>
+        .page-header {
+            margin-bottom: 30px;
+        }
+        
+        .page-title {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .stats-card {
+            transition: transform 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+}
+

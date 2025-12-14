@@ -1,0 +1,227 @@
+@model E_Commerce.Web.ViewModels.UserCreateViewModel
+@{
+    ViewBag.Title = "Đăng ký";
+}
+
+<!-- Page Title -->
+<div class="page-title light-background">
+    <div class="container d-lg-flex justify-content-between align-items-center">
+        <h1 class="mb-2 mb-lg-0">Đăng ký</h1>
+        <nav class="breadcrumbs">
+            <ol>
+                <li><a href="@Url.Action("Index", "Home", new { area = "User" })">Trang chủ</a></li>
+                <li class="current">Đăng ký</li>
+            </ol>
+        </nav>
+    </div>
+</div><!-- End Page Title -->
+
+<!-- Register Section -->
+<section id="register" class="register section">
+    <div class="container" data-aos="fade-up" data-aos-delay="100">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="registration-form-wrapper">
+                    <div class="form-header text-center">
+                        <h2>Tạo tài khoản của bạn</h2>
+                        <p>Tạo tài khoản và bắt đầu mua sắm cùng chúng tôi</p>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-8 mx-auto">
+                            <form id="registerForm" method="post" action="@Url.Action("Register", "Account", new { area = "User" })">
+                                @Html.AntiForgeryToken()
+
+                                <div class="form-floating mb-3">
+                                    @Html.TextBoxFor(m => m.Email, new { @class = "form-control", type = "email", placeholder = "Địa chỉ Email", autocomplete = "email" })
+                                    @Html.LabelFor(m => m.Email)
+                                </div>
+
+                                <div class="form-floating mb-3">
+                                    @Html.TextBoxFor(m => m.FullName, new { @class = "form-control", placeholder = "Họ và tên", autocomplete = "name" })
+                                    @Html.LabelFor(m => m.FullName)
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Mật khẩu", autocomplete = "new-password" })
+                                            @Html.LabelFor(m => m.Password)
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control", placeholder = "Xác nhận mật khẩu", autocomplete = "new-password" })
+                                            @Html.LabelFor(m => m.ConfirmPassword)
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-floating mb-3">
+                                    @Html.TextBoxFor(m => m.Phone, new { @class = "form-control", type = "tel", placeholder = "Số điện thoại", autocomplete = "tel" })
+                                    @Html.LabelFor(m => m.Phone)
+                                </div>
+
+                                <div class="form-floating mb-4">
+                                    @Html.TextAreaFor(m => m.Address, new { @class = "form-control", placeholder = "Địa chỉ", style = "height: 100px;", autocomplete = "street-address" })
+                                    @Html.LabelFor(m => m.Address)
+                                </div>
+
+                                <div class="form-check mb-4">
+                                    <input class="form-check-input" type="checkbox" id="termsCheck" name="termsCheck" required="">
+                                    <label class="form-check-label" for="termsCheck">
+                                        Tôi đồng ý với <a href="#">Điều khoản dịch vụ</a> và <a href="#">Chính sách bảo mật</a>
+                                    </label>
+                                </div>
+
+                                <div class="d-grid mb-4">
+                                    <button type="submit" class="btn btn-register">Tạo tài khoản</button>
+                                </div>
+
+                                <div class="login-link text-center">
+                                    <p>Đã có tài khoản? <a href="@Url.Action("Login", "Account", new { area = "User" })">Đăng nhập</a></p>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="social-login">
+                        <div class="row">
+                            <div class="col-lg-8 mx-auto">
+                                <div class="divider">
+                                    <span>hoặc đăng ký với</span>
+                                </div>
+                                <div class="social-buttons">
+                                    <a href="#" class="btn btn-social">
+                                        <i class="bi bi-google"></i>
+                                        <span>Google</span>
+                                    </a>
+                                    <a href="#" class="btn btn-social">
+                                        <i class="bi bi-facebook"></i>
+                                        <span>Facebook</span>
+                                    </a>
+                                    <a href="#" class="btn btn-social">
+                                        <i class="bi bi-apple"></i>
+                                        <span>Apple</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="decorative-elements">
+                        <div class="circle circle-1"></div>
+                        <div class="circle circle-2"></div>
+                        <div class="circle circle-3"></div>
+                        <div class="square square-1"></div>
+                        <div class="square square-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section><!-- /Register Section -->
+
+@section styles {
+    <style>
+        /* Address textarea styling - form-floating với textarea */
+        .form-floating > textarea.form-control {
+            height: 100px;
+            min-height: 100px;
+        }
+        
+        .form-floating > textarea.form-control:focus,
+        .form-floating > textarea.form-control:not(:placeholder-shown) {
+            padding-top: 1.625rem;
+            padding-bottom: 0.625rem;
+            height: 100px;
+            min-height: 100px;
+        }
+    </style>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        $(function () {
+            // Configure toastr (đã được load trong layout)
+            toastr.options = {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-right",
+                timeOut: "3000"
+            };
+
+            // Handle form submit
+            $("#registerForm").submit(function (e) {
+                e.preventDefault();
+
+                var $form = $(this);
+                var $btn = $form.find('button[type="submit"]');
+
+                // Check terms checkbox
+                if (!$('#termsCheck').is(':checked')) {
+                    toastr.error("Vui lòng đồng ý với Điều khoản dịch vụ và Chính sách bảo mật!");
+                    return false;
+                }
+
+                // Check password match
+                var pass = $("#Password").val();
+                var confirm = $("#ConfirmPassword").val();
+                if (pass !== confirm) {
+                    toastr.error("Mật khẩu nhập lại không khớp!");
+                    return false;
+                }
+
+                // Validate form
+                var validator = $form.validate();
+                if (!validator.form()) {
+                    var errors = [];
+                    $.each(validator.errorList, function (index, error) {
+                        if (error.message && errors.indexOf(error.message) === -1) {
+                            errors.push(error.message);
+                        }
+                    });
+                    if (errors.length > 0) {
+                        toastr.error(errors.join('<br>'));
+                    } else {
+                        toastr.error("Vui lòng kiểm tra lại thông tin đã nhập!");
+                    }
+                    return false;
+                }
+
+                // Disable button and show loading
+                var originalText = $btn.html();
+                $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Đang xử lý...');
+
+                $.ajax({
+                    url: $form.attr("action"),
+                    type: "POST",
+                    data: $form.serialize(),
+                    dataType: "json",
+                    success: function (resp) {
+                        if (resp.success) {
+                            // Hiển thị toast và đợi để user đọc được
+                            toastr.success(resp.message || "Đăng ký thành công!");
+                            setTimeout(function () {
+                                window.location.href = resp.redirectUrl || '@Url.Action("Login", "Account", new { area = "User" })';
+                            }, 2000); // Tăng lên 2 giây để user kịp đọc toast
+                        } else {
+                            toastr.error(resp.message || "Đăng ký thất bại!");
+                            $btn.prop('disabled', false).html(originalText);
+                        }
+                    },
+                    error: function (xhr) {
+                        var errorMessage = "Không kết nối được máy chủ!";
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        toastr.error(errorMessage, "Lỗi kết nối");
+                        $btn.prop('disabled', false).html(originalText);
+                    }
+                });
+            });
+        });
+    </script>
+}
+

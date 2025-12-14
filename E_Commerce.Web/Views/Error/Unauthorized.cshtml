@@ -1,0 +1,146 @@
+@{
+    Layout = null;
+    Response.StatusCode = 401;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>401 - Unauthorized</title>
+    <!-- Favicons -->
+    <link href="https://res.cloudinary.com/dyvkrlz5i/image/upload/v1765680853/u6fkwhf7l2grvijqgn9l.jpg" rel="icon" type="image/jpeg">
+    <link href="https://res.cloudinary.com/dyvkrlz5i/image/upload/v1765680853/u6fkwhf7l2grvijqgn9l.jpg" rel="apple-touch-icon">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.1/aos.css" rel="stylesheet" />
+    <style>
+        /* Mirror template classes from NiceShop */
+        body.page-401 {
+            font-family: 'Roboto','Montserrat','Poppins',sans-serif;
+            background: #f7f7f7;
+            color: #111;
+            min-height: 100vh;
+        }
+        .error-401 {
+            padding: 80px 0;
+            margin: 0 auto;
+        }
+        .error-401 .error-icon {
+            font-size: 5rem;
+            color: rgba(17, 17, 17, 0.8);
+        }
+        .error-401 .error-code {
+            font-size: clamp(6rem, 15vw, 12rem);
+            font-weight: 800;
+            color: rgba(17, 17, 17, 0.9);
+            line-height: 1;
+        }
+        .error-401 .error-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #111;
+        }
+        .error-401 .error-text {
+            font-size: 1.1rem;
+            color: rgba(17, 17, 17, 0.7);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .error-401 .search-box {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .error-401 .search-box .input-group {
+            border-radius: 50px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        .error-401 .search-box .form-control {
+            border: none;
+            padding: 15px 25px;
+            font-size: 1rem;
+        }
+        .error-401 .search-box .search-btn {
+            background: #111;
+            color: #fff;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        .error-401 .search-box .search-btn:hover {
+            background: #333;
+        }
+        .error-401 .error-action {
+            margin-top: 2rem;
+        }
+        .error-401 .error-action .btn {
+            padding: 12px 30px;
+            font-weight: 600;
+            border-radius: 50px;
+            margin: 0 10px;
+            transition: all 0.3s;
+        }
+        .error-401 .error-action .btn-primary {
+            background: #111;
+            border-color: #111;
+            color: #fff;
+        }
+        .error-401 .error-action .btn-primary:hover {
+            background: #333;
+            border-color: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .error-401 .error-action .btn-outline-primary {
+            border: 2px solid #111;
+            color: #111;
+            background: transparent;
+        }
+        .error-401 .error-action .btn-outline-primary:hover {
+            background: #111;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="page-401">
+    <main class="main">
+        <section id="error-401" class="error-401 section">
+            <div class="container" data-aos="fade-up" data-aos-delay="100">
+                <div class="text-center">
+                    <div class="error-icon mb-4" data-aos="zoom-in" data-aos-delay="200">
+                        <i class="bi bi-shield-exclamation"></i>
+                    </div>
+                    <h1 class="error-code mb-4" data-aos="fade-up" data-aos-delay="300">401</h1>
+                    <h2 class="error-title mb-3" data-aos="fade-up" data-aos-delay="400">Không có quyền truy cập</h2>
+                    <p class="error-text mb-4" data-aos="fade-up" data-aos-delay="500">
+                        Bạn không có quyền truy cập vào khu vực quản trị.<br />
+                        Vui lòng đăng nhập với tài khoản Admin để tiếp tục.
+                    </p>
+
+                    <div class="error-action" data-aos="fade-up" data-aos-delay="600">
+                        <a href="@Url.Action("Login", "Account", new { area = "Admin" })" class="btn btn-primary">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập Admin
+                        </a>
+                        <a href="@Url.Action("Index", "Home", new { area = "User" })" class="btn btn-outline-primary">
+                            <i class="bi bi-house me-2"></i>Về trang chủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.1/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+    </script>
+</body>
+</html>
+

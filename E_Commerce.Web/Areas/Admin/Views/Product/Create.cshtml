@@ -1,0 +1,389 @@
+@model E_Commerce.Web.ViewModels.ProductCreateViewModel
+
+@{
+    ViewBag.Title = "Tạo sản phẩm mới";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>Tạo sản phẩm mới
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form id="productForm" method="post" action="@Url.Action("Create", "Product")" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+
+                        <div class="row">
+                            <!-- Thông tin cơ bản -->
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="Name" class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
+                                    @Html.TextBoxFor(m => m.Name, new { @class = "form-control", @required = "required", @data_val = "true", @data_val_required = "Vui lòng nhập tên sản phẩm" })
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="Alias" class="form-label">Alias (URL-friendly)</label>
+                                    @Html.TextBoxFor(m => m.Alias, new { @class = "form-control", @placeholder = "Để trống để tự động tạo từ tên sản phẩm" })
+                                    <small class="form-text text-muted">Ví dụ: "ao-thun-nam-cao-cap". Nếu để trống, hệ thống sẽ tự động tạo từ tên sản phẩm.</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="Description" class="form-label">Mô tả ngắn</label>
+                                    @Html.TextAreaFor(m => m.Description, new { @class = "form-control", @rows = "3", @placeholder = "Mô tả ngắn gọn về sản phẩm (dùng cho SEO, preview, listing)" })
+                                    <small class="form-text text-muted">Tối đa 500 ký tự. Dùng cho SEO, preview trong danh sách sản phẩm.</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="Content" class="form-label">Mô tả chi tiết</label>
+                                    @Html.TextAreaFor(m => m.Content, new { @class = "form-control", @id = "ContentEditor", @rows = "10" })
+                                    <small class="form-text text-muted">Mô tả chi tiết về sản phẩm với định dạng HTML. Dùng cho trang chi tiết sản phẩm.</small>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="Price" class="form-label">Giá <span class="text-danger">*</span></label>
+                                            @Html.TextBoxFor(m => m.Price, new { @class = "form-control", @type = "number", @step = "1", @min = "0", @required = "required", @data_val = "true", @data_val_required = "Vui lòng nhập giá", @data_val_range = "Giá phải lớn hơn 0", @data_val_range_min = "0" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="CompareAtPrice" class="form-label">Giá so sánh</label>
+                                            @Html.TextBoxFor(m => m.CompareAtPrice, new { @class = "form-control", @type = "number", @step = "1", @min = "0" })
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="CategoryId" class="form-label">Danh mục <span class="text-danger">*</span></label>
+                                            @Html.DropDownListFor(m => m.CategoryId, Model.Categories, "-- Chọn danh mục --", new { @class = "form-select", @required = "required", @data_val = "true", @data_val_required = "Vui lòng chọn danh mục" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="BrandId" class="form-label">Thương hiệu</label>
+                                            @Html.DropDownListFor(m => m.BrandId, Model.Brands, "-- Chọn thương hiệu --", new { @class = "form-select" })
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <div class="mb-3">
+                                                <label class="form-label">Số lượng tồn kho</label>
+                                                <div class="form-control-plaintext">
+                                                    <span class="text-muted">Số lượng tồn kho được tính tự động từ tổng số lượng của các biến thể (variants)</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="SKU" class="form-label">SKU</label>
+                                            @Html.TextBoxFor(m => m.SKU, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Ảnh và thuộc tính -->
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="ProductImages" class="form-label">Ảnh sản phẩm</label>
+                                    <input type="file" id="ProductImages" name="ProductImages" class="form-control" accept="image/*" multiple />
+                                    <small class="form-text text-muted">
+                                        Có thể chọn nhiều ảnh (JPG, PNG, GIF, WEBP, tối đa 10MB/ảnh).<br>
+                                        <strong>Ảnh đầu tiên sẽ tự động là ảnh chính.</strong>
+                                    </small>
+                                    <div id="productImagesPreview" class="mt-2 row g-2"></div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="Material" class="form-label">Chất liệu</label>
+                                    @Html.TextBoxFor(m => m.Material, new { @class = "form-control" })
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="Origin" class="form-label">Xuất xứ</label>
+                                    @Html.TextBoxFor(m => m.Origin, new { @class = "form-control" })
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="Style" class="form-label">Phong cách</label>
+                                    @Html.TextBoxFor(m => m.Style, new { @class = "form-control" })
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="Gender" class="form-label">Giới tính</label>
+                                    @Html.DropDownListFor(m => m.Gender, Model.Genders, "-- Chọn giới tính --", new { @class = "form-select" })
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="Season" class="form-label">Mùa</label>
+                                    @Html.DropDownListFor(m => m.Season, Model.Seasons, "-- Chọn mùa --", new { @class = "form-select" })
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        @Html.CheckBoxFor(m => m.IsActive, new { @class = "form-check-input" })
+                                        <label class="form-check-label" for="IsActive">Kích hoạt</label>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        @Html.CheckBoxFor(m => m.IsFeatured, new { @class = "form-check-input" })
+                                        <label class="form-check-label" for="IsFeatured">Nổi bật</label>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        @Html.CheckBoxFor(m => m.IsOnSale, new { @class = "form-check-input" })
+                                        <label class="form-check-label" for="IsOnSale">Đang giảm giá</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Lưu sản phẩm
+                                </button>
+                                <a href="@Url.Action("Index", "Product")" class="btn btn-secondary">
+                                    <i class="fas fa-times me-2"></i>Hủy
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        /* Trạng thái loading cho nút submit */
+        .btn.is-loading {
+            pointer-events: none;
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .btn.is-loading .spinner-border {
+            vertical-align: text-bottom;
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 0.15em solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spinner-border 0.75s linear infinite;
+        }
+        @@keyframes spinner-border {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .btn.is-loading .spinner-border-sm {
+            width: 0.875rem;
+            height: 0.875rem;
+            border-width: 0.125em;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.12/dist/jquery.validate.unobtrusive.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/toastr.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.css" rel="stylesheet" />
+    
+    <!-- CKEditor 5 -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/41.0.0/classic/ckeditor.js"></script>
+
+    <script>
+        var contentEditor = null; // Lưu reference của CKEditor instance
+        
+        $(document).ready(function () {
+            // Khởi tạo CKEditor cho mô tả chi tiết
+            ClassicEditor
+                .create(document.querySelector('#ContentEditor'), {
+                    toolbar: {
+                        items: [
+                            'heading', '|',
+                            'bold', 'italic', 'link', '|',
+                            'bulletedList', 'numberedList', '|',
+                            'blockQuote', 'insertTable', '|',
+                            'undo', 'redo'
+                        ]
+                    },
+                    language: 'vi',
+                    placeholder: 'Nhập mô tả chi tiết về sản phẩm...'
+                })
+                .then(editor => {
+                    contentEditor = editor; // Lưu reference
+                    console.log('CKEditor initialized successfully');
+                })
+                .catch(error => {
+                    console.error('Error initializing CKEditor:', error);
+                });
+
+            // Preview ảnh sản phẩm khi chọn nhiều file
+            $('#ProductImages').on('change', function (e) {
+                var files = e.target.files;
+                var previewContainer = $('#productImagesPreview');
+                previewContainer.empty();
+
+                if (files && files.length > 0) {
+                    for (var i = 0; i < files.length; i++) {
+                        (function (file, index) {
+                            var reader = new FileReader();
+                            reader.onload = function (e) {
+                                var col = $('<div class="col-6 col-md-4 mb-2" data-index="' + index + '"></div>');
+                                var imgWrapper = $('<div class="position-relative"></div>');
+                                var img = $('<img src="' + e.target.result + '" class="img-thumbnail" style="width: 100%; height: 100px; object-fit: cover;" />');
+                                
+                                // Đánh dấu ảnh đầu tiên là ảnh chính
+                                if (index === 0) {
+                                    var mainBadge = $('<span class="badge bg-primary position-absolute top-0 start-0 m-1" style="font-size: 10px;">Ảnh chính</span>');
+                                    imgWrapper.append(mainBadge);
+                                }
+                                
+                                var removeBtn = $('<button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 remove-image-btn" style="padding: 2px 6px; font-size: 10px;"><i class="fas fa-times"></i></button>');
+                                
+                                removeBtn.on('click', function () {
+                                    col.remove();
+                                    // Tạo DataTransfer để xóa file khỏi input
+                                    var dt = new DataTransfer();
+                                    var input = document.getElementById('ProductImages');
+                                    for (var j = 0; j < input.files.length; j++) {
+                                        if (j !== index) {
+                                            dt.items.add(input.files[j]);
+                                        }
+                                    }
+                                    input.files = dt.files;
+                                    // Cập nhật lại badge "Ảnh chính" cho ảnh đầu tiên còn lại
+                                    previewContainer.find('.badge').remove();
+                                    previewContainer.find('.col-6:first').find('.position-relative').prepend('<span class="badge bg-primary position-absolute top-0 start-0 m-1" style="font-size: 10px;">Ảnh chính</span>');
+                                });
+
+                                imgWrapper.append(img).append(removeBtn);
+                                col.append(imgWrapper);
+                                previewContainer.append(col);
+                            };
+                            reader.readAsDataURL(file);
+                        })(files[i], i);
+                    }
+                }
+            });
+
+            // Xử lý submit form
+            var isSubmitting = false;
+            var submitBtn = $('#productForm').find('button[type="submit"]');
+            var originalText = submitBtn.html();
+            
+            // Ngăn chặn submit nhiều lần ngay từ đầu
+            $('#productForm').on('submit', function (e) {
+                // Luôn prevent default để tránh form submit bình thường
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+
+                // Kiểm tra nếu đang submit thì không cho phép submit lại
+                if (isSubmitting || submitBtn.prop('disabled')) {
+                    console.log('Form đang được xử lý, vui lòng đợi...');
+                    return false;
+                }
+
+                // Cập nhật giá trị từ CKEditor về textarea trước khi submit
+                if (contentEditor) {
+                    contentEditor.updateSourceElement();
+                }
+
+                // Validate form
+                if (!$(this).valid()) {
+                    var errors = [];
+                    $(this).find('.field-validation-error').each(function () {
+                        errors.push($(this).text());
+                    });
+                    if (errors.length > 0) {
+                        toastr.error(errors.join('<br>'));
+                    }
+                    return false;
+                }
+
+                // Đặt cờ và disable nút ngay lập tức
+                isSubmitting = true;
+                submitBtn
+                    .prop('disabled', true)
+                    .addClass('is-loading')
+                    .html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Đang lưu...');
+
+                // Tạo FormData để upload file
+                var formData = new FormData(this);
+
+                $.ajax({
+                    url: '@Url.Action("Create", "Product")',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response.success) {
+                            toastr.success(response.message || 'Tạo sản phẩm thành công');
+                            // Không reset isSubmitting vì sẽ redirect
+                            setTimeout(function () {
+                                if (response.redirectUrl) {
+                                    window.location.href = response.redirectUrl;
+                                } else {
+                                    window.location.href = '@Url.Action("Index", "Product")';
+                                }
+                            }, 1500);
+                        } else {
+                            toastr.error(response.message || 'Có lỗi xảy ra');
+                            // Reset trạng thái để có thể submit lại
+                            isSubmitting = false;
+                            submitBtn.prop('disabled', false).removeClass('is-loading').html(originalText);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        var errorMessage = 'Có lỗi xảy ra khi tạo sản phẩm';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        } else if (xhr.responseText) {
+                            try {
+                                var errorResponse = JSON.parse(xhr.responseText);
+                                if (errorResponse.message) {
+                                    errorMessage = errorResponse.message;
+                                }
+                            } catch (e) {
+                                console.error('Error parsing response:', e);
+                            }
+                        }
+                        toastr.error(errorMessage);
+                        // Reset trạng thái để có thể submit lại
+                        isSubmitting = false;
+                        submitBtn.prop('disabled', false).removeClass('is-loading').html(originalText);
+                    },
+                    complete: function() {
+                        // Đảm bảo reset trạng thái nếu có lỗi (phòng trường hợp không vào success/error)
+                        // Chỉ reset nếu không redirect (tức là có lỗi)
+                        if (!isSubmitting) {
+                            submitBtn.prop('disabled', false).removeClass('is-loading').html(originalText);
+                        }
+                    }
+                });
+
+                return false; // Ngăn form submit bình thường
+            });
+        });
+    </script>
+}
+

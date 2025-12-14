@@ -1,0 +1,358 @@
+@model List<E_Commerce.Model.Models.Order>
+@{
+    ViewBag.Title = "Quản lý đơn hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="page-header mb-4">
+    <h1 class="page-title">Đơn hàng</h1>
+    <p class="text-muted">Quản lý và xử lý đơn hàng</p>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>Danh sách đơn hàng</h5>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-sm btn-outline-secondary filter-btn active" data-filter="all">Tất cả</button>
+            <button type="button" class="btn btn-sm btn-outline-warning filter-btn" data-filter="Pending">Chờ xác nhận</button>
+            <button type="button" class="btn btn-sm btn-outline-info filter-btn" data-filter="Processing">Đang xử lý</button>
+            <button type="button" class="btn btn-sm btn-outline-primary filter-btn" data-filter="Shipping">Đang giao</button>
+            <button type="button" class="btn btn-sm btn-outline-success filter-btn" data-filter="Delivered">Đã giao</button>
+            <button type="button" class="btn btn-sm btn-outline-dark filter-btn" data-filter="Completed">Hoàn tất</button>
+            <button type="button" class="btn btn-sm btn-outline-danger filter-btn" data-filter="Cancelled">Đã hủy</button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped align-middle" id="ordersTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Mã đơn</th>
+                        <th>Khách hàng</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Thanh toán</th>
+                        <th>Ngày đặt</th>
+                        <th class="text-end">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var o in Model)
+                        {
+                            var status = o.Status?.ToLower() ?? "";
+                            var isPaid = o.PaymentStatus != null && o.PaymentStatus.ToLower() == "paid";
+                            var statusBadge = GetStatusBadge(o.Status);
+                            var paymentBadge = GetPaymentBadge(o.PaymentStatus);
+                            <tr data-status="@o.Status" data-id="@o.Id">
+                                <td><strong>@o.OrderNumber</strong></td>
+                                <td>@(o.User != null ? o.User.FullName : o.ShippingName)</td>
+                                <td class="text-primary fw-bold">@o.TotalAmount.ToString("N0") đ</td>
+                                <td><span class="badge @statusBadge">@GetStatusText(o.Status)</span></td>
+                                <td><span class="badge @paymentBadge">@GetPaymentText(o.PaymentStatus)</span></td>
+                                <td>@o.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="text-end order-actions">
+                                    <a href="@Url.Action("Details", "Order", new { area = "Admin", id = o.Id })" class="btn btn-sm btn-outline-primary" title="Xem chi tiết">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    @* Nút xác nhận - chỉ hiện khi Pending *@
+                                    @if (status == "pending")
+                                    {
+                                        <button type="button" class="btn btn-sm btn-outline-success btn-confirm" data-id="@o.Id" data-order="@o.OrderNumber" title="Xác nhận đơn">
+                                            <i class="bi bi-check-circle"></i>
+                                        </button>
+                                    }
+                                    @* Nút bắt đầu giao - chỉ hiện khi Processing *@
+                                    @if (status == "processing")
+                                    {
+                                        <button type="button" class="btn btn-sm btn-outline-info btn-ship" data-id="@o.Id" data-order="@o.OrderNumber" title="Bắt đầu giao">
+                                            <i class="bi bi-truck"></i>
+                                        </button>
+                                    }
+                                    @* Nút đã giao - chỉ hiện khi Shipping *@
+                                    @if (status == "shipping")
+                                    {
+                                        <button type="button" class="btn btn-sm btn-outline-success btn-delivered" data-id="@o.Id" data-order="@o.OrderNumber" title="Đánh dấu đã giao">
+                                            <i class="bi bi-box-seam"></i>
+                                        </button>
+                                    }
+                                    @* Nút hủy - chỉ hiện khi Pending hoặc Processing *@
+                                    @if (status == "pending" || status == "processing")
+                                    {
+                                        <button type="button" class="btn btn-sm btn-outline-danger btn-cancel" data-id="@o.Id" data-order="@o.OrderNumber" title="Hủy đơn">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                    }
+                                    @* Nút thanh toán - chỉ hiện khi chưa thanh toán và đã qua Pending *@
+                                    @if (!isPaid && status != "cancelled" && status != "pending")
+                                    {
+                                        <button type="button" class="btn btn-sm btn-outline-warning btn-paid" data-id="@o.Id" data-order="@o.OrderNumber" title="Đánh dấu đã thanh toán">
+                                            <i class="bi bi-cash-coin"></i>
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-3">Chưa có đơn hàng</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetStatusBadge(string status)
+    {
+        switch (status?.ToLower())
+        {
+            case "pending": return "bg-warning text-dark";
+            case "processing": return "bg-info";
+            case "shipping": return "bg-primary";
+            case "delivered": return "bg-success";
+            case "completed": return "bg-dark";
+            case "cancelled": return "bg-danger";
+            default: return "bg-secondary";
+        }
+    }
+    
+    string GetStatusText(string status)
+    {
+        switch (status?.ToLower())
+        {
+            case "pending": return "Chờ xác nhận";
+            case "processing": return "Đang xử lý";
+            case "shipping": return "Đang giao";
+            case "delivered": return "Đã giao";
+            case "cancelled": return "Đã hủy";
+            case "completed": return "Hoàn tất";
+            default: return status ?? "N/A";
+        }
+    }
+    
+    string GetPaymentBadge(string status)
+    {
+        switch (status?.ToLower())
+        {
+            case "pending": return "bg-warning text-dark";
+            case "paid": return "bg-success";
+            case "failed": return "bg-danger";
+            case "refunded": return "bg-secondary";
+            default: return "bg-secondary";
+        }
+    }
+    
+    string GetPaymentText(string status)
+    {
+        switch (status?.ToLower())
+        {
+            case "pending": return "Chưa thanh toán";
+            case "paid": return "Đã thanh toán";
+            case "failed": return "Thất bại";
+            case "refunded": return "Đã hoàn tiền";
+            default: return status ?? "N/A";
+        }
+    }
+}
+
+@section scripts {
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Toastr -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    
+    <script>
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "timeOut": "3000"
+        };
+
+        // Filter buttons
+        $('.filter-btn').click(function() {
+            $('.filter-btn').removeClass('active');
+            $(this).addClass('active');
+            var filter = $(this).data('filter');
+            
+            if (filter === 'all') {
+                $('#ordersTable tbody tr').show();
+            } else {
+                $('#ordersTable tbody tr').each(function() {
+                    if ($(this).data('status') === filter) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            }
+        });
+
+        // Xác nhận đơn hàng
+        $(document).on('click', '.btn-confirm', function() {
+            var id = $(this).data('id');
+            var orderNumber = $(this).data('order');
+            
+            Swal.fire({
+                title: 'Xác nhận đơn hàng?',
+                text: `Bạn có chắc muốn xác nhận đơn ${orderNumber}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="bi bi-check-circle me-1"></i>Xác nhận',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.post('@Url.Action("Confirm", "Order", new { area = "Admin" })', { id: id }, function(res) {
+                        if (res.success) {
+                            toastr.success(res.message);
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            toastr.error(res.message);
+                        }
+                    });
+                }
+            });
+        });
+
+        // Bắt đầu giao hàng
+        $(document).on('click', '.btn-ship', function() {
+            var id = $(this).data('id');
+            var orderNumber = $(this).data('order');
+            
+            Swal.fire({
+                title: 'Bắt đầu giao hàng?',
+                html: `<p>Đơn hàng: <strong>${orderNumber}</strong></p>
+                       <input type="text" id="trackingNumber" class="swal2-input" placeholder="Mã vận đơn (không bắt buộc)">`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#17a2b8',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="bi bi-truck me-1"></i>Bắt đầu giao',
+                cancelButtonText: 'Hủy',
+                preConfirm: () => {
+                    return document.getElementById('trackingNumber').value;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.post('@Url.Action("StartShipping", "Order", new { area = "Admin" })', { id: id, trackingNumber: result.value }, function(res) {
+                        if (res.success) {
+                            toastr.success(res.message);
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            toastr.error(res.message);
+                        }
+                    });
+                }
+            });
+        });
+
+        // Đánh dấu đã giao
+        $(document).on('click', '.btn-delivered', function() {
+            var id = $(this).data('id');
+            var orderNumber = $(this).data('order');
+            
+            Swal.fire({
+                title: 'Xác nhận đã giao hàng?',
+                text: `Đơn ${orderNumber} đã được giao thành công?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="bi bi-box-seam me-1"></i>Đã giao',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.post('@Url.Action("MarkDelivered", "Order", new { area = "Admin" })', { id: id }, function(res) {
+                        if (res.success) {
+                            toastr.success(res.message);
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            toastr.error(res.message);
+                        }
+                    });
+                }
+            });
+        });
+
+        // Hủy đơn hàng
+        $(document).on('click', '.btn-cancel', function() {
+            var id = $(this).data('id');
+            var orderNumber = $(this).data('order');
+            
+            Swal.fire({
+                title: 'Hủy đơn hàng?',
+                html: `<p>Bạn có chắc muốn hủy đơn <strong>${orderNumber}</strong>?</p>
+                       <input type="text" id="cancelReason" class="swal2-input" placeholder="Lý do hủy (không bắt buộc)">`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="bi bi-x-circle me-1"></i>Hủy đơn',
+                cancelButtonText: 'Quay lại',
+                preConfirm: () => {
+                    return document.getElementById('cancelReason').value;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.post('@Url.Action("Cancel", "Order", new { area = "Admin" })', { id: id, reason: result.value }, function(res) {
+                        if (res.success) {
+                            toastr.success(res.message);
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            toastr.error(res.message);
+                        }
+                    });
+                }
+            });
+        });
+
+        // Đánh dấu đã thanh toán
+        $(document).on('click', '.btn-paid', function() {
+            var id = $(this).data('id');
+            var orderNumber = $(this).data('order');
+            
+            Swal.fire({
+                title: 'Xác nhận thanh toán?',
+                text: `Đánh dấu đơn ${orderNumber} đã thanh toán?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#ffc107',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="bi bi-cash-coin me-1"></i>Đã thanh toán',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.post('@Url.Action("MarkPaid", "Order", new { area = "Admin" })', { id: id }, function(res) {
+                        if (res.success) {
+                            toastr.success(res.message);
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            toastr.error(res.message);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+    
+    <style>
+        .order-actions {
+            white-space: nowrap;
+        }
+        .order-actions .btn {
+            margin-left: 4px;
+        }
+        .filter-btn.active {
+            font-weight: bold;
+        }
+    </style>
+}

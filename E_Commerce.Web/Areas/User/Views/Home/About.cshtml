@@ -1,0 +1,274 @@
+@{
+    ViewBag.Title = "Giới thiệu";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+
+<main class="main">
+
+    <!-- Page Title -->
+    <div class="page-title light-background">
+        <div class="container d-lg-flex justify-content-between align-items-center">
+            <h1 class="mb-2 mb-lg-0">Giới thiệu</h1>
+            <nav class="breadcrumbs">
+                <ol>
+                    <li><a href="@Url.Action("Index", "Home", new { area = "User" })">Trang chủ</a></li>
+                    <li class="current">Giới thiệu</li>
+                </ol>
+            </nav>
+        </div>
+    </div><!-- End Page Title -->
+
+    <!-- About 2 Section -->
+    <section id="about-2" class="about-2 section">
+
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+            <span class="section-badge"><i class="bi bi-info-circle"></i> Về chúng tôi</span>
+            <div class="row">
+                <div class="col-lg-6">
+                    <h2 class="about-title">Chúng tôi cam kết mang đến trải nghiệm mua sắm tuyệt vời nhất</h2>
+                    <p class="about-description">Với sứ mệnh cung cấp những sản phẩm chất lượng cao và dịch vụ chăm sóc khách hàng tận tâm, chúng tôi luôn nỗ lực không ngừng để đáp ứng mọi nhu cầu của bạn.</p>
+                </div>
+                <div class="col-lg-6">
+                    <p class="about-text">Từ những ngày đầu thành lập, chúng tôi đã đặt khách hàng làm trung tâm của mọi hoạt động. Mỗi sản phẩm được chọn lọc kỹ lưỡng, mỗi dịch vụ được cải thiện liên tục để mang lại giá trị tốt nhất cho bạn.</p>
+                    <p class="about-text">Chúng tôi tin rằng mua sắm không chỉ là giao dịch, mà còn là trải nghiệm. Vì vậy, chúng tôi luôn chú trọng vào từng chi tiết nhỏ nhất, từ giao diện website thân thiện đến quy trình đóng gói và vận chuyển chuyên nghiệp.</p>
+                </div>
+            </div>
+
+            <div class="row features-boxes gy-4 mt-3">
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="feature-box">
+                        <div class="icon-box">
+                            <i class="bi bi-bullseye"></i>
+                        </div>
+                        <h3><a href="#" class="stretched-link">Sứ mệnh của chúng tôi</a></h3>
+                        <p>Mang đến những sản phẩm chất lượng cao với giá cả hợp lý, đồng thời xây dựng mối quan hệ bền chặt với khách hàng thông qua dịch vụ xuất sắc.</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="feature-box">
+                        <div class="icon-box">
+                            <i class="bi bi-person-check"></i>
+                        </div>
+                        <h3><a href="#" class="stretched-link">Cam kết chất lượng</a></h3>
+                        <p>Mỗi sản phẩm đều được kiểm tra kỹ lưỡng trước khi đến tay khách hàng. Chúng tôi cam kết chỉ cung cấp những sản phẩm đạt tiêu chuẩn chất lượng cao nhất.</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="400">
+                    <div class="feature-box">
+                        <div class="icon-box">
+                            <i class="bi bi-clipboard-data"></i>
+                        </div>
+                        <h3><a href="#" class="stretched-link">Dịch vụ chuyên nghiệp</a></h3>
+                        <p>Đội ngũ nhân viên giàu kinh nghiệm luôn sẵn sàng hỗ trợ bạn 24/7. Từ tư vấn sản phẩm đến giải quyết khiếu nại, chúng tôi luôn ở đây vì bạn.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-5">
+                <div class="col-lg-12" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="video-box">
+                        <img src="@Url.Content("~/Content/img/about/about-wide-1.webp")" class="img-fluid" alt="Giới thiệu về chúng tôi">
+                        <a href="https://www.youtube.com/watch?v=Y7f98aduVJ8" class="glightbox pulsating-play-btn"></a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </section><!-- /About 2 Section -->
+
+    <!-- Stats Section -->
+    <section id="stats" class="stats section light-background">
+
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+            <div class="row gy-4">
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="stats-item">
+                        <i class="bi bi-emoji-smile"></i>
+                        <span data-purecounter-start="0" data-purecounter-end="10000" data-purecounter-duration="1" class="purecounter"></span>
+                        <p><strong>Khách hàng hài lòng</strong> <span>tin tưởng và ủng hộ chúng tôi</span></p>
+                    </div>
+                </div><!-- End Stats Item -->
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="stats-item">
+                        <i class="bi bi-journal-richtext"></i>
+                        <span data-purecounter-start="0" data-purecounter-end="5000" data-purecounter-duration="1" class="purecounter"></span>
+                        <p><strong>Sản phẩm đa dạng</strong> <span>đáp ứng mọi nhu cầu của bạn</span></p>
+                    </div>
+                </div><!-- End Stats Item -->
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="stats-item">
+                        <i class="bi bi-headset"></i>
+                        <span data-purecounter-start="0" data-purecounter-end="24" data-purecounter-duration="1" class="purecounter"></span>
+                        <p><strong>Hỗ trợ 24/7</strong> <span>luôn sẵn sàng phục vụ bạn</span></p>
+                    </div>
+                </div><!-- End Stats Item -->
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="stats-item">
+                        <i class="bi bi-people"></i>
+                        <span data-purecounter-start="0" data-purecounter-end="50" data-purecounter-duration="1" class="purecounter"></span>
+                        <p><strong>Nhân viên chuyên nghiệp</strong> <span>đội ngũ tận tâm và giàu kinh nghiệm</span></p>
+                    </div>
+                </div><!-- End Stats Item -->
+
+            </div>
+
+        </div>
+
+    </section><!-- /Stats Section -->
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="testimonials section">
+
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+            <span class="section-badge"><i class="bi bi-chat-quote"></i> Đánh giá từ khách hàng</span>
+            <h2 class="section-title text-center mb-5">Khách hàng nói gì về chúng tôi</h2>
+
+            <div class="testimonial-masonry">
+
+                <div class="testimonial-item" data-aos="fade-up">
+                    <div class="testimonial-content">
+                        <div class="quote-pattern">
+                            <i class="bi bi-quote"></i>
+                        </div>
+                        <p>Việc mua sắm tại đây thật sự rất tuyệt vời! Sản phẩm chất lượng, giao hàng nhanh chóng và nhân viên tư vấn rất nhiệt tình. Tôi sẽ tiếp tục ủng hộ cửa hàng.</p>
+                        <div class="client-info">
+                            <div class="client-image">
+                                <img src="https://res.cloudinary.com/dyvkrlz5i/image/upload/v1765553124/oupuec3qxkqaf09kbnbw.jpg" alt="Nguyễn Thị Mỹ Duyên">
+                            </div>
+                            <div class="client-details">
+                                <h3>Nguyễn Thị Mỹ Duyên</h3>
+                                <span class="position">Khách hàng thân thiết</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-item highlight" data-aos="fade-up" data-aos-delay="100">
+                    <div class="testimonial-content">
+                        <div class="quote-pattern">
+                            <i class="bi bi-quote"></i>
+                        </div>
+                        <p>Dịch vụ chăm sóc khách hàng xuất sắc và sản phẩm đa dạng đã giúp tôi tìm được những món đồ ưng ý. Đặc biệt là chính sách đổi trả rất linh hoạt, khiến tôi yên tâm khi mua sắm.</p>
+                        <div class="client-info">
+                            <div class="client-image">
+                                <img src="https://res.cloudinary.com/dyvkrlz5i/image/upload/v1765553125/rrpzwehyolaspxdwqyzz.jpg" alt="Nguyễn Cao Mạnh Hùng">
+                            </div>
+                            <div class="client-details">
+                                <h3>Nguyễn Cao Mạnh Hùng</h3>
+                                <span class="position">Khách hàng VIP</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-item" data-aos="fade-up" data-aos-delay="200">
+                    <div class="testimonial-content">
+                        <div class="quote-pattern">
+                            <i class="bi bi-quote"></i>
+                        </div>
+                        <p>Giao diện website dễ sử dụng, thanh toán an toàn và giao hàng đúng hẹn. Tôi rất hài lòng với trải nghiệm mua sắm tại đây.</p>
+                        <div class="client-info">
+                            <div class="client-image">
+                                <img src="https://res.cloudinary.com/dyvkrlz5i/image/upload/v1765553125/rrpzwehyolaspxdwqyzz.jpg" alt="Bùi Quang Tiến">
+                            </div>
+                            <div class="client-details">
+                                <h3>Bùi Quang Tiến</h3>
+                                <span class="position">Khách hàng mới</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-item" data-aos="fade-up" data-aos-delay="300">
+                    <div class="testimonial-content">
+                        <div class="quote-pattern">
+                            <i class="bi bi-quote"></i>
+                        </div>
+                        <p>Chất lượng sản phẩm vượt quá mong đợi và giá cả rất hợp lý. Đội ngũ nhân viên chuyên nghiệp đã giúp tôi chọn được sản phẩm phù hợp nhất.</p>
+                        <div class="client-info">
+                            <div class="client-image">
+                                <img src="https://res.cloudinary.com/dyvkrlz5i/image/upload/v1765553124/rmeppp9wtygaezcdjdhx.jpg" alt="Nguyễn Thành Tài">
+                            </div>
+                            <div class="client-details">
+                                <h3>Nguyễn Thành Tài</h3>
+                                <span class="position">Khách hàng thường xuyên</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-item highlight" data-aos="fade-up" data-aos-delay="400">
+                    <div class="testimonial-content">
+                        <div class="quote-pattern">
+                            <i class="bi bi-quote"></i>
+                        </div>
+                        <p>Chính sách bảo hành và đổi trả minh bạch, cùng với dịch vụ giao hàng nhanh chóng đã khiến tôi trở thành khách hàng trung thành. Tôi luôn giới thiệu cửa hàng cho bạn bè và người thân.</p>
+                        <div class="client-info">
+                            <div class="client-image">
+                                <img src="https://res.cloudinary.com/dyvkrlz5i/image/upload/v1765553125/iklmwxwbojvuzvada2pp.jpg" alt="Lê Hoàng Minh Nhật">
+                            </div>
+                            <div class="client-details">
+                                <h3>Lê Hoàng Minh Nhật</h3>
+                                <span class="position">Khách hàng đại sứ</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-item" data-aos="fade-up" data-aos-delay="500">
+                    <div class="testimonial-content">
+                        <div class="quote-pattern">
+                            <i class="bi bi-quote"></i>
+                        </div>
+                        <p>Trải nghiệm mua sắm trực tuyến tại đây đã thay đổi cách tôi mua sắm. Sự tiện lợi, an toàn và chất lượng dịch vụ khiến tôi hoàn toàn tin tưởng.</p>
+                        <div class="client-info">
+                            <div class="client-image">
+                                <img src="https://res.cloudinary.com/dyvkrlz5i/image/upload/v1765553125/rrpzwehyolaspxdwqyzz.jpg" alt="Phan Tuấn Giang">
+                            </div>
+                            <div class="client-details">
+                                <h3>Phan Tuấn Giang</h3>
+                                <span class="position">Khách hàng online</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section><!-- /Testimonials Section -->
+
+</main>
+
+@section scripts {
+    <script>
+        // Initialize PureCounter (đã được load trong vendor bundle)
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof PureCounter !== 'undefined') {
+                new PureCounter();
+            }
+            
+            // Initialize GLightbox cho video
+            if (typeof GLightbox !== 'undefined') {
+                const lightbox = GLightbox({
+                    selector: '.glightbox',
+                    touchNavigation: true,
+                    loop: false,
+                    autoplayVideos: true
+                });
+            }
+        });
+    </script>
+}
+

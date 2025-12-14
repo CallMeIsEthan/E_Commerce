@@ -1,0 +1,361 @@
+@model E_Commerce.Web.ViewModels.LoginViewModel
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập Admin - NovaStore</title>
+    <!-- Favicons -->
+    <link href="https://res.cloudinary.com/dyvkrlz5i/image/upload/v1765680853/u6fkwhf7l2grvijqgn9l.jpg" rel="icon" type="image/jpeg">
+    <link href="https://res.cloudinary.com/dyvkrlz5i/image/upload/v1765680853/u6fkwhf7l2grvijqgn9l.jpg" rel="apple-touch-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&subset=vietnamese&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 450px;
+            padding: 50px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #000000 0%, #333333 50%, #000000 100%);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .login-header h1 {
+            color: #000000;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .login-header p {
+            color: #666666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #000000;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 15px;
+            color: #000000;
+            background: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #000000;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: #999999;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: #000000;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            background: #333333;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert-danger {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c33;
+        }
+
+        .field-validation-error {
+            color: #c33;
+            font-size: 13px;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .validation-summary-errors {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c33;
+            padding: 12px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .validation-summary-errors ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .validation-summary-errors li {
+            margin: 5px 0;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .back-link a {
+            color: #666666;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .back-link a:hover {
+            color: #000000;
+        }
+
+        .icon-wrapper {
+            width: 60px;
+            height: 60px;
+            background: #000000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+
+        .icon-wrapper i {
+            color: #ffffff;
+            font-size: 28px;
+        }
+
+        .btn-login:disabled {
+            background: #999999;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-login.loading {
+            position: relative;
+            color: transparent;
+        }
+
+        .btn-login.loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @@keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @@media (max-width: 480px) {
+            .login-container {
+                padding: 40px 30px;
+            }
+
+            .login-header h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="icon-wrapper">
+                <i class="bi bi-shield-lock"></i>
+            </div>
+            <h1>Admin Login</h1>
+            <p>Đăng nhập vào khu vực quản trị</p>
+        </div>
+
+        <form id="loginForm" class="login-form" action="@Url.Action("Login", "Account", new { area = "Admin" })" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.Username, "Tên đăng nhập")
+                @Html.TextBoxFor(m => m.Username, new { @class = "form-control", placeholder = "Nhập username hoặc email", autofocus = "autofocus", id = "Username" })
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.Password, "Mật khẩu")
+                @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Nhập mật khẩu", id = "Password" })
+            </div>
+
+            <button type="submit" class="btn-login" id="btnLogin">Đăng nhập</button>
+        </form>
+
+        <div class="back-link">
+            <a href="@Url.Action("Index", "Home", new { area = "" })">← Về trang chủ</a>
+        </div>
+    </div>
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- jQuery & Validation -->
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryval")
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"></script>
+
+    <script>
+        $(function () {
+            toastr.options = {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-right",
+                timeOut: "3000"
+            };
+
+            // Handle form submit
+            $("#loginForm").submit(function (e) {
+                e.preventDefault();
+
+                var $form = $(this);
+                var $btn = $("#btnLogin");
+
+                // Validate form - lấy errors và hiển thị trong toast
+                var validator = $form.validate();
+                if (!validator.form()) {
+                    var errors = [];
+                    
+                    // Lấy errors từ validator
+                    $.each(validator.errorList, function (index, error) {
+                        if (error.message && errors.indexOf(error.message) === -1) {
+                            errors.push(error.message);
+                        }
+                    });
+                    
+                    // Lấy errors từ validation messages trên form
+                    $form.find('.field-validation-error').each(function () {
+                        var errorText = $(this).text().trim();
+                        if (errorText && errors.indexOf(errorText) === -1) {
+                            errors.push(errorText);
+                        }
+                    });
+                    
+                    if (errors.length > 0) {
+                        toastr.error(errors.join('<br>'));
+                    } else {
+                        toastr.error("Vui lòng kiểm tra lại thông tin đã nhập!");
+                    }
+                    return false;
+                }
+
+                // Disable button and show loading
+                $btn.prop('disabled', true).addClass('loading');
+
+                $.ajax({
+                    url: $form.attr("action") || '@Url.Action("Login", "Account", new { area = "Admin" })',
+                    type: "POST",
+                    data: $form.serialize(),
+                    dataType: "json",
+                    success: function (resp) {
+                        if (resp.success) {
+                            toastr.success(resp.message || "Đăng nhập thành công!");
+                            setTimeout(function () {
+                                window.location.href = resp.redirectUrl || '@Url.Action("Index", "Dashboard", new { area = "Admin" })';
+                            }, 1000);
+                        } else {
+                            toastr.error(resp.message || "Đăng nhập thất bại!");
+                            $btn.prop('disabled', false).removeClass('loading');
+                        }
+                    },
+                    error: function (xhr) {
+                        var errorMessage = "Không kết nối được máy chủ!";
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        toastr.error(errorMessage, "Lỗi kết nối");
+                        $btn.prop('disabled', false).removeClass('loading');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+

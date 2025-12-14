@@ -1,0 +1,388 @@
+﻿@{
+    ViewBag.Title = "Trang chủ";
+    
+    var featuredProducts = ViewBag.FeaturedProducts as List<E_Commerce.Dto.ProductDto> ?? new List<E_Commerce.Dto.ProductDto>();
+    var newProducts = ViewBag.NewProducts as List<E_Commerce.Dto.ProductDto> ?? new List<E_Commerce.Dto.ProductDto>();
+    var saleProducts = ViewBag.SaleProducts as List<E_Commerce.Dto.ProductDto> ?? new List<E_Commerce.Dto.ProductDto>();
+    var productMainImages = ViewBag.ProductMainImages as Dictionary<int, string> ?? new Dictionary<int, string>();
+    var wishlistProductIds = ViewBag.WishlistProductIds as HashSet<int> ?? new HashSet<int>();
+}
+
+<main class="main">
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero section">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="content-wrapper" data-aos="fade-up" data-aos-delay="100">
+                    <h1 class="hero-title">Khám phá sản phẩm tuyệt vời</h1>
+                    <p class="hero-description">Khám phá bộ sưu tập sản phẩm được tuyển chọn của chúng tôi, được thiết kế để nâng cao phong cách sống của bạn. Từ thời trang đến công nghệ, tìm mọi thứ bạn cần với các ưu đãi độc quyền và giao hàng nhanh chóng.</p>
+                    <div class="hero-actions" data-aos="fade-up" data-aos-delay="200">
+                        <a href="@Url.Action("Index", "Product", new { area = "User" })" class="btn-primary">Mua ngay</a>
+                        <a href="#categories" class="btn-secondary">Xem danh mục</a>
+                    </div>
+                    <div class="features-list" data-aos="fade-up" data-aos-delay="300">
+                        <div class="feature-item">
+                            <i class="bi bi-truck"></i>
+                            <span>Miễn phí vận chuyển</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="bi bi-award"></i>
+                            <span>Đảm bảo chất lượng</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="bi bi-headset"></i>
+                            <span>Hỗ trợ 24/7</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-visuals">
+                @if (featuredProducts.Any())
+                {
+                    var firstProduct = featuredProducts.First();
+                    var firstImage = productMainImages.ContainsKey(firstProduct.Id) ? productMainImages[firstProduct.Id] : null;
+                    
+                    <div class="product-showcase" data-aos="fade-left" data-aos-delay="200">
+                        <div class="product-card featured">
+                            @if (!string.IsNullOrEmpty(firstImage))
+                            {
+                                <img src="@firstImage" alt="@firstProduct.Name" class="img-fluid">
+                            }
+                            <div class="product-badge">Bán chạy</div>
+                            <div class="product-info">
+                                <h4>@firstProduct.Name</h4>
+                                <div class="price">
+                                    <span class="sale-price">@firstProduct.Price.ToString("N0") đ</span>
+                                    @if (firstProduct.CompareAtPrice.HasValue && firstProduct.CompareAtPrice > firstProduct.Price)
+                                    {
+                                        <span class="original-price">@firstProduct.CompareAtPrice.Value.ToString("N0") đ</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (featuredProducts.Count > 1)
+                        {
+                            <div class="product-grid">
+                                @foreach (var product in featuredProducts.Skip(1).Take(2))
+                                {
+                                    var productImage = productMainImages.ContainsKey(product.Id) ? productMainImages[product.Id] : null;
+                                    <div class="product-mini" data-aos="zoom-in" data-aos-delay="@(400 + (featuredProducts.IndexOf(product) * 100))">
+                                        @if (!string.IsNullOrEmpty(productImage))
+                                        {
+                                            <img src="@productImage" alt="@product.Name" class="img-fluid">
+                                        }
+                                        <span class="mini-price">@product.Price.ToString("N0") đ</span>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+
+                <div class="floating-elements">
+                    <div class="floating-icon cart" data-aos="fade-up" data-aos-delay="600">
+                        <i class="bi bi-cart3"></i>
+                        <span class="notification-dot">0</span>
+                    </div>
+                    <div class="floating-icon wishlist" data-aos="fade-up" data-aos-delay="700">
+                        <i class="bi bi-heart"></i>
+                    </div>
+                    <div class="floating-icon search" data-aos="fade-up" data-aos-delay="800">
+                        <i class="bi bi-search"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section><!-- /Hero Section -->
+
+    <!-- Promo Cards Section (Categories) -->
+    @{
+        var homeCategories = ViewBag.HomeCategories as List<E_Commerce.Dto.CategoryDto> ?? new List<E_Commerce.Dto.CategoryDto>();
+        var categoryProductCounts = ViewBag.CategoryProductCounts as Dictionary<int, int> ?? new Dictionary<int, int>();
+    }
+    @if (homeCategories.Any())
+    {
+        <section id="promo-cards" class="promo-cards section">
+            <div class="container" data-aos="fade-up" data-aos-delay="100">
+                <div class="row gy-4">
+                    @if (homeCategories.Count > 0)
+                    {
+                        var firstCategory = homeCategories.First();
+                        var firstCategoryProductCount = categoryProductCounts.ContainsKey(firstCategory.Id) ? categoryProductCounts[firstCategory.Id] : 0;
+                        
+                        <!-- Category Featured (Large) -->
+                        <div class="col-lg-6">
+                            <div class="category-featured" data-aos="fade-right" data-aos-delay="200">
+                                <div class="category-image">
+                                    @if (!string.IsNullOrEmpty(firstCategory.ImageUrl))
+                                    {
+                                        <img src="@firstCategory.ImageUrl" alt="@firstCategory.Name" class="img-fluid">
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 400px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                            <i class="bi bi-folder" style="font-size: 5rem; color: rgba(255,255,255,0.5);"></i>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="category-content">
+                                    <span class="category-tag">Nổi bật</span>
+                                    <h2>@firstCategory.Name</h2>
+                                    @if (!string.IsNullOrEmpty(firstCategory.Description))
+                                    {
+                                        <p>@(firstCategory.Description.Length > 150 ? firstCategory.Description.Substring(0, 150) + "..." : firstCategory.Description)</p>
+                                    }
+                                    else
+                                    {
+                                        <p>Khám phá bộ sưu tập @firstCategory.Name với nhiều sản phẩm chất lượng và giá cả hợp lý.</p>
+                                    }
+                                    <a href="@Url.Action("Index", "Product", new { area = "User", categoryId = firstCategory.Id })" class="btn-shop">
+                                        Xem bộ sưu tập <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Category Cards (Small) -->
+                        <div class="col-lg-6">
+                            <div class="row gy-4">
+                                @foreach (var category in homeCategories.Skip(1).Take(4))
+                                {
+                                    var categoryProductCount = categoryProductCounts.ContainsKey(category.Id) ? categoryProductCounts[category.Id] : 0;
+                                    var categoryIndex = homeCategories.IndexOf(category);
+                                    var delay = 300 + ((categoryIndex - 1) * 100);
+                                    
+                                    <div class="col-xl-6">
+                                        <div class="category-card" data-aos="fade-up" data-aos-delay="@delay">
+                                            <div class="category-image">
+                                                @if (!string.IsNullOrEmpty(category.ImageUrl))
+                                                {
+                                                    <img src="@category.ImageUrl" alt="@category.Name" class="img-fluid">
+                                                }
+                                                else
+                                                {
+                                                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                                        <i class="bi bi-folder" style="font-size: 3rem; color: #ccc;"></i>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="category-content">
+                                                <h4>@category.Name</h4>
+                                                <p>@categoryProductCount sản phẩm</p>
+                                                <a href="@Url.Action("Index", "Product", new { area = "User", categoryId = category.Id })" class="card-link">
+                                                    Xem ngay <i class="bi bi-arrow-right"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </section>
+    }
+
+    <!-- Best Sellers Section -->
+    <section id="best-sellers" class="best-sellers section">
+        <!-- Section Title -->
+        <div class="container section-title" data-aos="fade-up">
+            <h2>Sản phẩm bán chạy</h2>
+            <p>Những sản phẩm được yêu thích nhất của chúng tôi</p>
+        </div><!-- End Section Title -->
+
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+            <div class="row g-5">
+                @foreach (var product in featuredProducts.Take(4))
+                {
+                    var productImage = productMainImages.ContainsKey(product.Id) ? productMainImages[product.Id] : null;
+                    <div class="col-lg-3 col-md-6">
+                        <div class="product-item">
+                            <div class="product-image">
+                                @if (product.IsFeatured)
+                                {
+                                    <div class="product-badge">Nổi bật</div>
+                                }
+                                @if (!string.IsNullOrEmpty(productImage))
+                                {
+                                    <img src="@productImage" alt="@product.Name" class="img-fluid" loading="lazy">
+                                }
+                                <div class="product-actions">
+                                    @{
+                                        var isInWishlist = wishlistProductIds.Contains(product.Id);
+                                    }
+                                    <button class="action-btn wishlist-btn @(isInWishlist ? "active" : "")" data-product-id="@product.Id">
+                                        <i class="bi @(isInWishlist ? "bi-heart-fill text-danger" : "bi-heart")"></i>
+                                    </button>
+                                    <button class="action-btn quickview-btn" data-product-id="@product.Id">
+                                        <i class="bi bi-zoom-in"></i>
+                                    </button>
+                                </div>
+                                <a href="@Url.Action("Details", "Product", new { id = product.Id, area = "User" })" class="cart-btn">Xem chi tiết</a>
+                            </div>
+                            <div class="product-info">
+                                <div class="product-category">@(product.CategoryName ?? "Sản phẩm")</div>
+                                <h4 class="product-name">
+                                    <a href="@Url.Action("Details", "Product", new { id = product.Id, area = "User" })">@product.Name</a>
+                                </h4>
+                                <div class="product-price">
+                                    @if (product.CompareAtPrice.HasValue && product.CompareAtPrice > product.Price)
+                                    {
+                                        <span class="old-price">@product.CompareAtPrice.Value.ToString("N0") đ</span>
+                                        <span class="current-price">@product.Price.ToString("N0") đ</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="current-price">@product.Price.ToString("N0") đ</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section><!-- /Best Sellers Section -->
+
+    <!-- New Arrivals Section -->
+    @if (newProducts.Any())
+    {
+        <section id="new-arrivals" class="best-sellers section">
+            <div class="container section-title" data-aos="fade-up">
+                <h2>Sản phẩm mới</h2>
+                <p>Những sản phẩm mới nhất của chúng tôi</p>
+            </div>
+
+            <div class="container" data-aos="fade-up" data-aos-delay="100">
+                <div class="row g-5">
+                    @foreach (var product in newProducts.Take(4))
+                    {
+                        var productImage = productMainImages.ContainsKey(product.Id) ? productMainImages[product.Id] : null;
+                        <div class="col-lg-3 col-md-6">
+                            <div class="product-item">
+                                <div class="product-image">
+                                    <div class="product-badge">Mới</div>
+                                    @if (!string.IsNullOrEmpty(productImage))
+                                    {
+                                        <img src="@productImage" alt="@product.Name" class="img-fluid" loading="lazy">
+                                    }
+                                    <div class="product-actions">
+                                        <button class="action-btn wishlist-btn" data-product-id="@product.Id">
+                                            <i class="bi bi-heart"></i>
+                                        </button>
+                                        <button class="action-btn quickview-btn" data-product-id="@product.Id">
+                                            <i class="bi bi-zoom-in"></i>
+                                        </button>
+                                    </div>
+                                    <a href="@Url.Action("Details", "Product", new { id = product.Id, area = "User" })" class="cart-btn">Xem chi tiết</a>
+                                </div>
+                                <div class="product-info">
+                                    <div class="product-category">@(product.CategoryName ?? "Sản phẩm")</div>
+                                    <h4 class="product-name">
+                                        <a href="@Url.Action("Details", "Product", new { id = product.Id, area = "User" })">@product.Name</a>
+                                    </h4>
+                                    <div class="product-price">
+                                        @if (product.CompareAtPrice.HasValue && product.CompareAtPrice > product.Price)
+                                        {
+                                            <span class="old-price">@product.CompareAtPrice.Value.ToString("N0") đ</span>
+                                            <span class="current-price">@product.Price.ToString("N0") đ</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="current-price">@product.Price.ToString("N0") đ</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </section>
+    }
+
+    <!-- Sale Products Section -->
+    @if (saleProducts.Any())
+    {
+        <section id="sale-products" class="best-sellers section">
+            <div class="container section-title" data-aos="fade-up">
+                <h2>Sản phẩm đang giảm giá</h2>
+                <p>Ưu đãi đặc biệt dành cho bạn</p>
+            </div>
+
+            <div class="container" data-aos="fade-up" data-aos-delay="100">
+                <div class="row g-5">
+                    @foreach (var product in saleProducts.Take(4))
+                    {
+                        var productImage = productMainImages.ContainsKey(product.Id) ? productMainImages[product.Id] : null;
+                        var discountPercent = 0;
+                        if (product.CompareAtPrice.HasValue && product.CompareAtPrice > product.Price)
+                        {
+                            discountPercent = (int)(((product.CompareAtPrice.Value - product.Price) / product.CompareAtPrice.Value) * 100);
+                        }
+                        
+                        <div class="col-lg-3 col-md-6">
+                            <div class="product-item">
+                                <div class="product-image">
+                                    @if (discountPercent > 0)
+                                    {
+                                        <div class="product-badge sale-badge">-@discountPercent%</div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(productImage))
+                                    {
+                                        <img src="@productImage" alt="@product.Name" class="img-fluid" loading="lazy">
+                                    }
+                                    <div class="product-actions">
+                                        <button class="action-btn wishlist-btn" data-product-id="@product.Id">
+                                            <i class="bi bi-heart"></i>
+                                        </button>
+                                        <button class="action-btn quickview-btn" data-product-id="@product.Id">
+                                            <i class="bi bi-zoom-in"></i>
+                                        </button>
+                                    </div>
+                                    <a href="@Url.Action("Details", "Product", new { id = product.Id, area = "User" })" class="cart-btn">Xem chi tiết</a>
+                                </div>
+                                <div class="product-info">
+                                    <div class="product-category">@(product.CategoryName ?? "Sản phẩm")</div>
+                                    <h4 class="product-name">
+                                        <a href="@Url.Action("Details", "Product", new { id = product.Id, area = "User" })">@product.Name</a>
+                                    </h4>
+                                    <div class="product-price">
+                                        @if (product.CompareAtPrice.HasValue && product.CompareAtPrice > product.Price)
+                                        {
+                                            <span class="old-price">@product.CompareAtPrice.Value.ToString("N0") đ</span>
+                                            <span class="current-price">@product.Price.ToString("N0") đ</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="current-price">@product.Price.ToString("N0") đ</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </section>
+    }
+
+</main>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            // Quick view button click
+            $('.quickview-btn').on('click', function (e) {
+                e.preventDefault();
+                var productId = $(this).data('product-id');
+                // TODO: Implement quick view functionality
+                console.log('Quick view:', productId);
+            });
+        });
+    </script>
+}

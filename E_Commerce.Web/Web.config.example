@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Example Web.config file
+  Copy this file to Web.config and fill in your actual values
+  DO NOT commit Web.config with real credentials to git
+-->
+<configuration>
+  <appSettings>
+    <!-- Cloudinary Configuration -->
+    <add key="Cloudinary:CloudName" value="your-cloudinary-cloud-name" />
+    <add key="Cloudinary:ApiKey" value="your-cloudinary-api-key" />
+    <add key="Cloudinary:ApiSecret" value="your-cloudinary-api-secret" />
+    
+    <!-- Email Configuration -->
+    <add key="Email:SmtpHost" value="smtp.gmail.com" />
+    <add key="Email:SmtpPort" value="587" />
+    <add key="Email:SenderEmail" value="your-email@gmail.com" />
+    <add key="Email:SenderPassword" value="your-app-password" />
+    <add key="Email:SenderName" value="NovaStore" />
+  </appSettings>
+</configuration>
+

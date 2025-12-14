@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@(ViewBag.Title ?? "Dashboard") - Admin NovaStore</title>
+    
+    <!-- Favicons -->
+    <link href="https://res.cloudinary.com/dyvkrlz5i/image/upload/v1765680853/u6fkwhf7l2grvijqgn9l.jpg" rel="icon" type="image/jpeg">
+    <link href="https://res.cloudinary.com/dyvkrlz5i/image/upload/v1765680853/u6fkwhf7l2grvijqgn9l.jpg" rel="apple-touch-icon">
+    
+    <!-- Bootstrap CSS -->
+    <link href="~/Content/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Bootstrap Icons -->
+    <link href="~/Content/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet" />
+    <!-- Font Awesome (nếu cần) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&subset=vietnamese&display=swap" rel="stylesheet">
+    
+    <!-- Admin CSS -->
+    <link href="~/Areas/Admin/Content/css/admin.css" rel="stylesheet" />
+    
+    <!-- Toastr CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css" rel="stylesheet" />
+    
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
+    
+    @RenderSection("styles", required: false)
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="@Url.Action("Index", "Dashboard", new { area = "Admin" })" class="sidebar-brand">
+                <i class="bi bi-shop"></i>
+                <span>NovaStore Admin</span>
+            </a>
+            <button class="sidebar-toggle d-lg-none" id="sidebarToggle">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "Dashboard", new { area = "Admin" })" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "Product", new { area = "Admin" })" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Product" ? "active" : "")">
+                        <i class="bi bi-box-seam"></i>
+                        <span>Sản phẩm</span>
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "Category", new { area = "Admin" })" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Category" ? "active" : "")">
+                        <i class="bi bi-tags"></i>
+                        <span>Danh mục</span>
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "Brand", new { area = "Admin" })" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Brand" ? "active" : "")">
+                        <i class="bi bi-award"></i>
+                        <span>Thương hiệu</span>
+                    </a>
+                </li>
+                
+                @{
+                    var pendingOrdersCount = ViewBag.PendingOrdersCount as int? ?? 0;
+                }
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "Order", new { area = "Admin" })" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Order" ? "active" : "")">
+                        <i class="bi bi-cart-check"></i>
+                        <span>Đơn hàng</span>
+                        @if (pendingOrdersCount > 0)
+                        {
+                            <span class="badge bg-danger">@pendingOrdersCount</span>
+                        }
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "User", new { area = "Admin" })" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" ? "active" : "")">
+                        <i class="bi bi-people"></i>
+                        <span>Người dùng</span>
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "Review", new { area = "Admin" })" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Review" ? "active" : "")">
+                        <i class="bi bi-star"></i>
+                        <span>Đánh giá</span>
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "DiscountCode", new { area = "Admin" })" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "DiscountCode" ? "active" : "")">
+                        <i class="bi bi-ticket-perforated"></i>
+                        <span>Mã giảm giá</span>
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "Report", new { area = "Admin" })" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Report" ? "active" : "")">
+                        <i class="bi bi-graph-up"></i>
+                        <span>Báo cáo</span>
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "Setting", new { area = "Admin" })" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Setting" ? "active" : "")">
+                        <i class="bi bi-gear"></i>
+                        <span>Cài đặt</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <a href="@Url.Action("Index", "Home", new { area = "" })" class="nav-link" target="_blank">
+                <i class="bi bi-box-arrow-up-right"></i>
+                <span>Về trang chủ</span>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="header-left">
+                <button class="sidebar-toggle d-lg-none" id="mobileSidebarToggle">
+                    <i class="bi bi-list"></i>
+                </button>
+                <div class="breadcrumb-nav">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard", new { area = "Admin" })">Dashboard</a></li>
+                            @if (ViewContext.RouteData.Values["controller"]?.ToString() != "Dashboard")
+                            {
+                                <li class="breadcrumb-item active">@ViewContext.RouteData.Values["controller"]</li>
+                            }
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <!-- Search -->
+                <div class="header-search">
+                    <button class="search-toggle" type="button">
+                        <i class="bi bi-search"></i>
+                    </button>
+                    <div class="search-box">
+                        <input type="text" class="form-control" placeholder="Tìm kiếm...">
+                        <button type="button" class="search-close">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Notifications -->
+                <div class="header-notifications dropdown">
+                    <button class="notification-btn" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-bell"></i>
+                        <span class="badge bg-danger">3</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end notification-dropdown">
+                        <li class="dropdown-header">Thông báo</li>
+                        <li><a class="dropdown-item" href="#">
+                            <div class="notification-item">
+                                <i class="bi bi-cart-check text-primary"></i>
+                                <div>
+                                    <strong>Đơn hàng mới</strong>
+                                    <p>Bạn có 5 đơn hàng mới cần xử lý</p>
+                                    <small>5 phút trước</small>
+                                </div>
+                            </div>
+                        </a></li>
+                        <li><a class="dropdown-item" href="#">
+                            <div class="notification-item">
+                                <i class="bi bi-star text-warning"></i>
+                                <div>
+                                    <strong>Đánh giá mới</strong>
+                                    <p>Bạn có 3 đánh giá mới</p>
+                                    <small>10 phút trước</small>
+                                </div>
+                            </div>
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-center" href="#">Xem tất cả</a></li>
+                    </ul>
+                </div>
+                
+                <!-- User Menu -->
+                <div class="header-user dropdown">
+                    <button class="user-btn" type="button" data-bs-toggle="dropdown">
+                        <div class="user-avatar">
+                            <i class="bi bi-person-circle"></i>
+                        </div>
+                        <span class="user-name">@(Session["AdminUsername"] ?? "Admin")</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end user-dropdown">
+                        <li class="dropdown-header">
+                            <div class="user-info">
+                                <strong>@(Session["AdminUsername"] ?? "Admin")</strong>
+                                <small>@(Session["AdminUserEmail"] ?? "admin@novastore.com")</small>
+                            </div>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="@Url.Action("Profile", "Account", new { area = "Admin" })">
+                            <i class="bi bi-person"></i> Thông tin cá nhân
+                        </a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("ChangePassword", "Account", new { area = "Admin" })">
+                            <i class="bi bi-key"></i> Đổi mật khẩu
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="@Url.Action("Logout", "Account", new { area = "Admin" })">
+                            <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Page Content -->
+        <main class="page-content">
+            @RenderBody()
+        </main>
+        
+        <!-- Footer -->
+        <footer class="admin-footer">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <p class="mb-0">&copy; @DateTime.Now.Year NovaStore Admin. All rights reserved.</p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Scripts -->
+    <!-- jQuery (phải load trước các script khác) -->
+    <script src="~/Scripts/jquery-3.7.0.min.js"></script>
+    <script src="~/Content/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Toastr -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"></script>
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    
+    <!-- Admin JS -->
+    <script src="~/Areas/Admin/Content/js/admin.js"></script>
+    
+    <script>
+        // Configure Toastr globally
+        toastr.options = {
+            closeButton: true,
+            progressBar: true,
+            positionClass: "toast-top-right",
+            timeOut: 3000,
+            extendedTimeOut: 1000
+        };
+    </script>
+    
+    @RenderSection("scripts", required: false)
+</body>
+</html>
+
+

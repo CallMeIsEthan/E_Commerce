@@ -1,0 +1,391 @@
+@model List<E_Commerce.Dto.OrderDto>
+@{
+    ViewBag.Title = "Đơn hàng của tôi";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+
+<main class="main">
+    <div class="page-title light-background">
+        <div class="container d-lg-flex justify-content-between align-items-center">
+            <h1 class="mb-2 mb-lg-0">Đơn hàng của tôi</h1>
+            <nav class="breadcrumbs">
+                <ol>
+                    <li><a href="@Url.Action("Index", "Home", new { area = "User" })">Trang chủ</a></li>
+                    <li class="current">Đơn hàng</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <section class="section order-list">
+        <div class="container">
+            @{
+                Func<string, string> getStatusIcon = status =>
+                {
+                    status = (status ?? "").ToLowerInvariant();
+                    if (status.Contains("ship")) return "bi-truck";
+                    if (status.Contains("deliver")) return "bi-check-circle";
+                    if (status.Contains("process")) return "bi-gear";
+                    if (status.Contains("cancel")) return "bi-x-circle";
+                    return "bi-clock-history";
+                };
+                Func<string, string> getPaymentIcon = pay =>
+                {
+                    pay = (pay ?? "").ToLowerInvariant();
+                    if (pay.Contains("paid")) return "bi-check-circle";
+                    if (pay.Contains("fail")) return "bi-x-circle";
+                    return "bi-hourglass-split";
+                };
+                Func<string, string> getStatusText = status =>
+                {
+                    status = (status ?? "").ToLowerInvariant();
+                    if (status.Contains("pending")) return "Chờ xác nhận";
+                    if (status.Contains("process")) return "Đang xử lý";
+                    if (status.Contains("ship")) return "Đang giao";
+                    if (status.Contains("deliver")) return "Đã giao";
+                    if (status.Contains("cancel")) return "Đã hủy";
+                    if (status.Contains("complete")) return "Hoàn tất";
+                    return status;
+                };
+                Func<string, string> getPaymentText = pay =>
+                {
+                    pay = (pay ?? "").ToLowerInvariant();
+                    if (pay.Contains("paid")) return "Đã thanh toán";
+                    if (pay.Contains("fail")) return "Thanh toán thất bại";
+                    if (pay.Contains("refund")) return "Đã hoàn tiền";
+                    return "Chưa thanh toán";
+                };
+            }
+            @if (Model != null && Model.Any())
+            {
+                <div class="row g-4">
+                    @foreach (var order in Model)
+                    {
+                        <div class="col-12">
+                            <div class="order-card">
+                                <div class="order-card__header d-flex flex-wrap justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="order-chip">#@order.OrderNumber</div>
+                                        <div class="text-muted small"><i class="bi bi-calendar3 me-1"></i>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</div>
+                                    </div>
+                                    <div class="d-flex gap-2 align-items-center mt-2 mt-md-0">
+                                        <span class="badge status-badge"><i class="bi @getStatusIcon(order.Status) me-1"></i>Đơn: @getStatusText(order.Status)</span>
+                                        <span class="badge payment-badge @(order.PaymentStatus == "Paid" ? "paid" : "pending")"><i class="bi @getPaymentIcon(order.PaymentStatus) me-1"></i>Thanh toán: @getPaymentText(order.PaymentStatus)</span>
+                                        <a class="btn btn-sm order-detail-btn" href="@Url.Action("Confirm", "Order", new { area = "User", id = order.Id })">
+                                            <i class="bi bi-eye me-1"></i>Xem chi tiết
+                                        </a>
+                                        @if ((order.Status ?? "").ToLower() == "pending" || (order.Status ?? "").ToLower() == "processing")
+                                        {
+                                            <button type="button" class="btn btn-sm btn-outline-danger order-cancel-btn" data-id="@order.Id" data-order="@order.OrderNumber">
+                                                <i class="bi bi-x-circle me-1"></i>Hủy đơn
+                                            </button>
+                                        }
+                                        @if ((order.Status ?? "").ToLower() == "cancelled")
+                                        {
+                                            <button type="button" class="btn btn-sm btn-outline-primary order-reorder-btn" data-id="@order.Id" data-order="@order.OrderNumber">
+                                                <i class="bi bi-arrow-counterclockwise me-1"></i>Đặt lại
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="order-card__body">
+                                    <div class="row g-3">
+                                        <div class="col-md-8">
+                                            @if (order.OrderDetails != null && order.OrderDetails.Any())
+                                            {
+                                                foreach (var item in order.OrderDetails)
+                                                {
+                                                    var img = !string.IsNullOrWhiteSpace(item.ProductImage)
+                                                        ? item.ProductImage
+                                                        : Url.Content("~/Content/images/default-product.png");
+                                                    <div class="order-item d-flex align-items-center">
+                                                        <div class="order-item__image">
+                                                            <img src="@img" alt="@item.ProductName" onerror="this.src='@Url.Content("~/Content/images/default-product.png")'">
+                                                        </div>
+                                                        <div class="order-item__info flex-grow-1">
+                                                            <div class="order-item__name">@item.ProductName</div>
+                                                            <div class="order-item__meta text-muted small">
+                                                                @if (!string.IsNullOrEmpty(item.Color))
+                                                                {
+                                                                    <span class="chip">@item.Color</span>
+                                                                }
+                                                                @if (!string.IsNullOrEmpty(item.Size))
+                                                                {
+                                                                    <span class="chip">Size @item.Size</span>
+                                                                }
+                                                            </div>
+                                                            <div class="order-item__price">
+                                                                <span>@item.UnitPrice.ToString("N0") đ</span>
+                                                                <span class="text-muted"> × @item.Quantity</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="order-item__total text-end">
+                                                            <strong>@item.TotalPrice.ToString("N0") đ</strong>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="order-summary-box">
+                                                <div class="summary-row">
+                                                    <span>Tạm tính</span>
+                                                    <span>@order.SubTotal.ToString("N0") đ</span>
+                                                </div>
+                                                <div class="summary-row">
+                                                    <span>Phí vận chuyển</span>
+                                                    <span>@order.ShippingFee.ToString("N0") đ</span>
+                                                </div>
+                                                <div class="summary-row">
+                                                    <span>Thuế</span>
+                                                    <span>@order.TaxAmount.ToString("N0") đ</span>
+                                                </div>
+                                                <div class="summary-row total">
+                                                    <span>Tổng cộng</span>
+                                                    <span>@order.TotalAmount.ToString("N0") đ</span>
+                                                </div>
+                                                <div class="summary-destination">
+                                                    <div class="text-muted small">Giao đến</div>
+                                                    <div class="fw-semibold">@order.ShippingName</div>
+                                                    <div class="text-muted small">@order.ShippingAddress</div>
+                                                    <div class="text-muted small">@order.ShippingPhone</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-bag-x" style="font-size: 3rem; color: #ccc;"></i>
+                    <h5 class="mt-3">Bạn chưa có đơn hàng nào</h5>
+                    <p class="text-muted">Hãy tiếp tục mua sắm để trải nghiệm sản phẩm.</p>
+                    <a href="@Url.Action("Index", "Product", new { area = "User" })" class="btn btn-primary mt-2">Xem sản phẩm</a>
+                </div>
+            }
+        </div>
+    </section>
+</main>
+
+@Html.AntiForgeryToken()
+
+@section scripts {
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Toastr -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script>
+        toastr.options = {
+            closeButton: true,
+            progressBar: true,
+            positionClass: "toast-top-right",
+            timeOut: 3000
+        };
+
+        $(document).on('click', '.order-cancel-btn', function () {
+            var orderId = $(this).data('id');
+            var orderNumber = $(this).data('order');
+
+            Swal.fire({
+                title: 'Hủy đơn hàng?',
+                html: `<p>Bạn có chắc muốn hủy đơn <strong>${orderNumber}</strong>?</p>
+                       <input type="text" id="cancelReason" class="swal2-input" placeholder="Lý do hủy (không bắt buộc)">`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="bi bi-x-circle me-1"></i>Hủy đơn',
+                cancelButtonText: 'Quay lại',
+                preConfirm: () => document.getElementById('cancelReason').value
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("Cancel", "Order", new { area = "User" })',
+                        type: 'POST',
+                        data: {
+                            id: orderId,
+                            reason: result.value,
+                            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function (res) {
+                            if (res.success) {
+                                toastr.success(res.message || 'Đơn hàng đã được hủy');
+                                setTimeout(() => location.reload(), 800);
+                            } else {
+                                toastr.error(res.message || 'Không thể hủy đơn');
+                            }
+                        },
+                        error: function () {
+                            toastr.error('Có lỗi xảy ra, vui lòng thử lại');
+                        }
+                    });
+                }
+            });
+        });
+
+        // Reorder
+        $(document).on('click', '.order-reorder-btn', function () {
+            var orderId = $(this).data('id');
+            var orderNumber = $(this).data('order');
+
+            Swal.fire({
+                title: 'Đặt lại đơn?',
+                html: `<p>Thêm lại sản phẩm từ đơn <strong>${orderNumber}</strong> vào giỏ hàng.</p>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#0d6efd',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="bi bi-arrow-counterclockwise me-1"></i>Đặt lại',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("Reorder", "Order", new { area = "User" })',
+                        type: 'POST',
+                        data: {
+                            id: orderId,
+                            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function (res) {
+                            if (res.success) {
+                                toastr.success(res.message || 'Đã thêm lại sản phẩm vào giỏ');
+                                if (res.redirect) {
+                                    setTimeout(() => window.location.href = res.redirect, 800);
+                                } else {
+                                    setTimeout(() => location.reload(), 800);
+                                }
+                            } else {
+                                toastr.error(res.message || 'Không thể đặt lại đơn');
+                            }
+                        },
+                        error: function () {
+                            toastr.error('Có lỗi xảy ra, vui lòng thử lại');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}
+
+@section styles {
+    <style>
+        .order-card {
+            border: 1px solid #e6e6e6;
+            border-radius: 14px;
+            padding: 18px;
+            background: #fff;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.04);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 40px rgba(0,0,0,0.08);
+        }
+        .order-card__header {
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 12px;
+            margin-bottom: 14px;
+        }
+        .order-chip {
+            background: #f2f2f2;
+            color: #111;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 0.2px;
+        }
+        .order-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #f2f2f2;
+            gap: 12px;
+        }
+        .order-item:last-child { border-bottom: none; }
+        .order-item__image img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 1px solid #ededed;
+        }
+        .order-item__name { font-weight: 700; margin-bottom: 4px; }
+        .order-item__price { font-weight: 700; color: #111; }
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 9px;
+            background: #f2f2f2;
+            border-radius: 999px;
+            margin-right: 6px;
+            color: #333;
+            font-size: 0.85rem;
+        }
+        .order-summary-box {
+            background: #fafafa;
+            border-radius: 12px;
+            padding: 14px;
+            border: 1px solid #ededed;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-weight: 500;
+        }
+        .summary-row.total {
+            font-weight: 800;
+            border-top: 1px dashed #dcdcdc;
+            margin-top: 8px;
+            padding-top: 10px;
+            color: #111;
+        }
+        .summary-destination {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px dashed #dcdcdc;
+            font-size: 0.9rem;
+        }
+        .status-badge {
+            background: #f2f2f2;
+            color: #111;
+            border-radius: 999px;
+            padding: 6px 10px;
+        }
+        .payment-badge {
+            border-radius: 999px;
+            padding: 6px 10px;
+        }
+        .payment-badge.paid {
+            background: #e9e9e9;
+            color: #111;
+        }
+        .payment-badge.pending {
+            background: #f5f5f5;
+            color: #555;
+        }
+        .order-card__body .btn {
+            border-radius: 10px;
+        }
+        .order-detail-btn {
+            border: 1px solid #d0d0d0;
+            color: #111;
+            background: #fff;
+            transition: all 0.15s ease;
+        }
+        .order-detail-btn:hover {
+            border-color: #111;
+            color: #111;
+            background: #f5f5f5;
+        }
+    </style>
+}
+

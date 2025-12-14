@@ -1,0 +1,193 @@
+@model E_Commerce.Dto.UserDto
+@using System
+@{
+    ViewBag.Title = "Chi tiết người dùng";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var orders = ViewBag.Orders as List<E_Commerce.Dto.OrderDto> ?? new List<E_Commerce.Dto.OrderDto>();
+    var orderCount = ViewBag.OrderCount as int? ?? 0;
+    var totalSpent = ViewBag.TotalSpent as decimal? ?? 0;
+}
+
+<div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="page-title">Chi tiết người dùng</h1>
+            <p class="text-muted mb-0">Thông tin và lịch sử đơn hàng</p>
+        </div>
+        <a href="@Url.Action("Index", "User", new { area = "Admin" })" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Quay lại
+        </a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Thông tin người dùng -->
+    <div class="col-lg-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-person-circle me-2"></i>Thông tin cá nhân</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="text-muted small">ID</label>
+                    <div class="fw-bold">#@Model.Id</div>
+                </div>
+                <div class="mb-3">
+                    <label class="text-muted small">Email</label>
+                    <div class="fw-bold">@Model.Email</div>
+                </div>
+                <div class="mb-3">
+                    <label class="text-muted small">Họ và tên</label>
+                    <div class="fw-bold">@(Model.FullName ?? "N/A")</div>
+                </div>
+                <div class="mb-3">
+                    <label class="text-muted small">Số điện thoại</label>
+                    <div class="fw-bold">@(Model.Phone ?? "N/A")</div>
+                </div>
+                <div class="mb-3">
+                    <label class="text-muted small">Địa chỉ</label>
+                    <div class="fw-bold">@(Model.Address ?? "N/A")</div>
+                </div>
+                <div class="mb-3">
+                    <label class="text-muted small">Trạng thái</label>
+                    <div>
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge bg-success">Hoạt động</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Vô hiệu hóa</span>
+                        }
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="text-muted small">Ngày tạo</label>
+                    <div>@Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")</div>
+                </div>
+                @if (Model.UpdatedDate.HasValue)
+                {
+                    <div class="mb-3">
+                        <label class="text-muted small">Cập nhật lần cuối</label>
+                        <div>@Model.UpdatedDate.Value.ToString("dd/MM/yyyy HH:mm")</div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Thống kê -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Thống kê</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="text-muted small">Tổng đơn hàng</label>
+                    <div class="h4 text-primary">@orderCount</div>
+                </div>
+                <div class="mb-3">
+                    <label class="text-muted small">Tổng chi tiêu</label>
+                    <div class="h4 text-success">@totalSpent.ToString("N0") đ</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lịch sử đơn hàng -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-bag-check me-2"></i>Lịch sử đơn hàng</h5>
+                <span class="badge bg-primary">@orderCount đơn hàng</span>
+            </div>
+            <div class="card-body">
+                @if (orders.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Mã đơn</th>
+                                    <th>Ngày đặt</th>
+                                    <th class="text-end">Tổng tiền</th>
+                                    <th class="text-center">Trạng thái</th>
+                                    <th class="text-center">Thanh toán</th>
+                                    <th class="text-center">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var order in orders)
+                                {
+                                    <tr>
+                                        <td>
+                                            <a href="@Url.Action("Details", "Order", new { area = "Admin", id = order.Id })" class="text-decoration-none">
+                                                #@order.OrderNumber
+                                            </a>
+                                        </td>
+                                        <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td class="text-end">@order.TotalAmount.ToString("N0") đ</td>
+                                        <td class="text-center">
+                                            @{
+                                                var statusClass = "";
+                                                var statusText = "";
+                                                switch (order.Status?.ToLower())
+                                                {
+                                                    case "pending":
+                                                        statusClass = "bg-warning";
+                                                        statusText = "Chờ xác nhận";
+                                                        break;
+                                                    case "processing":
+                                                        statusClass = "bg-info";
+                                                        statusText = "Đang xử lý";
+                                                        break;
+                                                    case "shipping":
+                                                        statusClass = "bg-primary";
+                                                        statusText = "Đang giao";
+                                                        break;
+                                                    case "delivered":
+                                                        statusClass = "bg-success";
+                                                        statusText = "Đã giao";
+                                                        break;
+                                                    case "cancelled":
+                                                        statusClass = "bg-danger";
+                                                        statusText = "Đã hủy";
+                                                        break;
+                                                    default:
+                                                        statusClass = "bg-secondary";
+                                                        statusText = order.Status ?? "N/A";
+                                                        break;
+                                                }
+                                            }
+                                            <span class="badge @statusClass">@statusText</span>
+                                        </td>
+                                        <td class="text-center">
+                                            @{
+                                                var paymentClass = order.PaymentStatus?.ToLower() == "paid" ? "bg-success" : "bg-warning";
+                                                var paymentText = order.PaymentStatus?.ToLower() == "paid" ? "Đã thanh toán" : "Chưa thanh toán";
+                                            }
+                                            <span class="badge @paymentClass">@paymentText</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="@Url.Action("Details", "Order", new { area = "Admin", id = order.Id })" 
+                                               class="btn btn-sm btn-info" title="Xem chi tiết">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                        <p class="mt-3">Người dùng chưa có đơn hàng nào</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+

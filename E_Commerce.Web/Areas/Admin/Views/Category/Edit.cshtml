@@ -1,0 +1,189 @@
+@model E_Commerce.Web.ViewModels.CategoryCreateViewModel
+
+@{
+    ViewBag.Title = "Sửa danh mục";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var imageUrl = ViewBag.ImageUrl as string;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-edit me-2"></i>Sửa danh mục
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form id="categoryForm" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="Name" class="form-label">Tên danh mục <span class="text-danger">*</span></label>
+                                    @Html.TextBoxFor(m => m.Name, new { @class = "form-control", @required = "required", @data_val = "true", @data_val_required = "Vui lòng nhập tên danh mục" })
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="Description" class="form-label">Mô tả</label>
+                                    @Html.TextAreaFor(m => m.Description, new { @class = "form-control", @rows = "5" })
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="ParentId" class="form-label">Danh mục cha</label>
+                                    @Html.DropDownListFor(m => m.ParentId, Model.ParentCategories, "-- Không có (Danh mục gốc) --", new { @class = "form-select" })
+                                    <small class="form-text text-muted">Để trống nếu đây là danh mục gốc</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="DisplayOrder" class="form-label">Thứ tự hiển thị</label>
+                                    @Html.TextBoxFor(m => m.DisplayOrder, new { @class = "form-control", @type = "number", @min = "0", @step = "1" })
+                                    <small class="form-text text-muted">Số càng nhỏ hiển thị càng ưu tiên.</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        @Html.CheckBoxFor(m => m.IsActive, new { @class = "form-check-input" })
+                                        <label class="form-check-label" for="IsActive">Kích hoạt</label>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        @Html.CheckBoxFor(m => m.HomeFlag, new { @class = "form-check-input" })
+                                        <label class="form-check-label" for="HomeFlag">Hiển thị trên trang chủ</label>
+                                        <small class="form-text text-muted d-block">Chỉ áp dụng cho danh mục bậc 1 (không có danh mục cha)</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="Image" class="form-label">Ảnh danh mục</label>
+                                    <input type="file" id="Image" name="Image" class="form-control" accept="image/*" />
+                                    <small class="form-text text-muted">Chấp nhận: JPG, PNG, GIF, WEBP (tối đa 10MB)</small>
+                                    @if (!string.IsNullOrEmpty(imageUrl))
+                                    {
+                                        <div class="mt-2">
+                                            <p class="text-muted mb-1">Ảnh hiện tại:</p>
+                                            <img src="@imageUrl" alt="Current" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
+                                        </div>
+                                    }
+                                    <div id="imagePreview" class="mt-2" style="display: none;">
+                                        <p class="text-muted mb-1">Ảnh mới:</p>
+                                        <img id="previewImg" src="" alt="Preview" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Cập nhật danh mục
+                                </button>
+                                <a href="@Url.Action("Index", "Category")" class="btn btn-secondary">
+                                    <i class="fas fa-times me-2"></i>Hủy
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.12/dist/jquery.validate.unobtrusive.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/toastr.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.css" rel="stylesheet" />
+
+    <script>
+        $(document).ready(function () {
+            // Preview ảnh mới khi chọn file
+            $('#Image').on('change', function (e) {
+                var file = e.target.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $('#previewImg').attr('src', e.target.result);
+                        $('#imagePreview').show();
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    $('#imagePreview').hide();
+                }
+            });
+
+            // Xử lý submit form
+            var isSubmitting = false;
+            $('#categoryForm').on('submit', function (e) {
+                e.preventDefault();
+
+                if (isSubmitting) {
+                    return false;
+                }
+
+                // Validate form
+                if (!$(this).valid()) {
+                    var errors = [];
+                    $(this).find('.field-validation-error').each(function () {
+                        errors.push($(this).text());
+                    });
+                    if (errors.length > 0) {
+                        toastr.error(errors.join('<br>'));
+                    }
+                    return false;
+                }
+
+                isSubmitting = true;
+                var submitBtn = $(this).find('button[type="submit"]');
+                var originalText = submitBtn.html();
+                submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Đang cập nhật...');
+
+                // Tạo FormData để upload file
+                var formData = new FormData(this);
+
+                $.ajax({
+                    url: '@Url.Action("Edit", "Category", new { id = ViewBag.CategoryId })',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response.success) {
+                            toastr.success(response.message || 'Cập nhật danh mục thành công');
+                            setTimeout(function () {
+                                if (response.redirectUrl) {
+                                    window.location.href = response.redirectUrl;
+                                } else {
+                                    window.location.href = '@Url.Action("Index", "Category")';
+                                }
+                            }, 1500);
+                        } else {
+                            toastr.error(response.message || 'Có lỗi xảy ra');
+                            isSubmitting = false;
+                            submitBtn.prop('disabled', false).html(originalText);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        var errorMessage = 'Có lỗi xảy ra khi cập nhật danh mục';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        toastr.error(errorMessage);
+                        isSubmitting = false;
+                        submitBtn.prop('disabled', false).html(originalText);
+                    }
+                });
+
+                return false;
+            });
+        });
+    </script>
+}
+

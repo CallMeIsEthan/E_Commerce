@@ -1,0 +1,374 @@
+@using System
+@{
+    ViewBag.Title = "Báo cáo";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section styles {
+    <style>
+        .stat-card {
+            background: linear-gradient(135deg, #6c7ae0 0%, #7b5fa6 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .stat-card.revenue { background: linear-gradient(135deg, #6c7ae0 0%, #7b5fa6 100%); }
+        .stat-card.orders { background: linear-gradient(135deg, #d88bc4 0%, #d86b7c 100%); }
+        .stat-card.customers { background: linear-gradient(135deg, #6bb5e8 0%, #5cc5d8 100%); }
+        .stat-card.products { background: linear-gradient(135deg, #6bc98a 0%, #5cc9b8 100%); }
+        .stat-card h3 { font-size: 14px; margin: 0 0 10px 0; opacity: 0.9; }
+        .stat-card .value { font-size: 32px; font-weight: bold; margin: 0; }
+        .stat-card .change { font-size: 12px; margin-top: 10px; opacity: 0.8; }
+        .chart-container { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+        .table-responsive { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+    </style>
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-0"><i class="bi bi-graph-up me-2"></i>Báo cáo tổng quan</h2>
+            <p class="text-muted">Thống kê doanh thu, đơn hàng và sản phẩm</p>
+        </div>
+    </div>
+
+    <!-- Doanh thu -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card revenue">
+                <h3>Doanh thu hôm nay</h3>
+                <p class="value">@(((decimal)ViewBag.RevenueToday).ToString("N0")) đ</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card revenue">
+                <h3>Doanh thu tháng này</h3>
+                <p class="value">@(((decimal)ViewBag.RevenueThisMonth).ToString("N0")) đ</p>
+                @if (ViewBag.RevenueLastMonth > 0)
+                {
+                    var change = ((decimal)ViewBag.RevenueThisMonth - (decimal)ViewBag.RevenueLastMonth) / (decimal)ViewBag.RevenueLastMonth * 100;
+                    <p class="change">
+                        @if (change >= 0)
+                        {
+                            <i class="bi bi-arrow-up"></i> <span>Tăng @change.ToString("F1")%</span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-arrow-down"></i> <span>Giảm @Math.Abs(change).ToString("F1")%</span>
+                        }
+                        so với tháng trước
+                    </p>
+                }
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card revenue">
+                <h3>Doanh thu năm @ViewBag.CurrentYear</h3>
+                <p class="value">@(((decimal)ViewBag.RevenueThisYear).ToString("N0")) đ</p>
+                @if (ViewBag.RevenueLastYear > 0)
+                {
+                    var change = ((decimal)ViewBag.RevenueThisYear - (decimal)ViewBag.RevenueLastYear) / (decimal)ViewBag.RevenueLastYear * 100;
+                    <p class="change">
+                        @if (change >= 0)
+                        {
+                            <i class="bi bi-arrow-up"></i> <span>Tăng @change.ToString("F1")%</span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-arrow-down"></i> <span>Giảm @Math.Abs(change).ToString("F1")%</span>
+                        }
+                        so với năm trước
+                    </p>
+                }
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card orders">
+                <h3>Đơn hàng hôm nay</h3>
+                <p class="value">@ViewBag.OrderCountToday</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Đơn hàng theo trạng thái -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="chart-container">
+                <h4 class="mb-4"><i class="bi bi-pie-chart me-2"></i>Đơn hàng theo trạng thái</h4>
+                <div class="row">
+                    <div class="col-md-2 text-center mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <h5 class="text-primary mb-1">@ViewBag.PendingCount</h5>
+                            <small class="text-muted">Chờ xác nhận</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-center mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <h5 class="text-info mb-1">@ViewBag.ProcessingCount</h5>
+                            <small class="text-muted">Đang xử lý</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-center mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <h5 class="text-warning mb-1">@ViewBag.ShippingCount</h5>
+                            <small class="text-muted">Đang giao</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-center mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <h5 class="text-success mb-1">@ViewBag.DeliveredCount</h5>
+                            <small class="text-muted">Đã giao</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-center mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <h5 class="text-danger mb-1">@ViewBag.CancelledCount</h5>
+                            <small class="text-muted">Đã hủy</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-center mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <h5 class="text-secondary mb-1">@ViewBag.OrderCountThisMonth</h5>
+                            <small class="text-muted">Tổng tháng này</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Biểu đồ doanh thu -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="chart-container">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Doanh thu theo tháng (@ViewBag.CurrentYear)</h4>
+                    <select id="yearSelect" class="form-select" style="width: auto;">
+                        @for (int y = DateTime.Now.Year - 2; y <= DateTime.Now.Year; y++)
+                        {
+                            <option value="@y" @(y == ViewBag.CurrentYear ? "selected" : "")>Năm @y</option>
+                        }
+                    </select>
+                </div>
+                <canvas id="revenueChart" height="80"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sản phẩm bán chạy -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="table-responsive">
+                <h4 class="mb-4"><i class="bi bi-trophy me-2"></i>Top 10 sản phẩm bán chạy</h4>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Tên sản phẩm</th>
+                            <th class="text-end">Số lượng bán</th>
+                            <th class="text-end">Doanh thu</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var bestSelling = ViewBag.BestSellingProducts as List<E_Commerce.Web.Areas.Admin.Controllers.BestSellingProductViewModel>;
+                            int index = 1;
+                        }
+                        @if (bestSelling != null && bestSelling.Any())
+                        {
+                            foreach (var product in bestSelling)
+                            {
+                                <tr>
+                                    <td>@index</td>
+                                    <td>
+                                        <a href="@Url.Action("Edit", "Product", new { area = "Admin", id = product.ProductId })">
+                                            @product.ProductName
+                                        </a>
+                                    </td>
+                                    <td class="text-end">@product.TotalQuantity</td>
+                                    <td class="text-end">@product.TotalRevenue.ToString("N0") đ</td>
+                                </tr>
+                                index++;
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">Chưa có dữ liệu</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sản phẩm được yêu thích -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="table-responsive">
+                <h4 class="mb-4"><i class="bi bi-heart-fill me-2"></i>Top 10 sản phẩm được yêu thích</h4>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Tên sản phẩm</th>
+                            <th class="text-end">Số lượt yêu thích</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var mostFavorite = ViewBag.MostFavoriteProducts as List<E_Commerce.Web.Areas.Admin.Controllers.MostFavoriteProductViewModel>;
+                            int favoriteIndex = 1;
+                        }
+                        @if (mostFavorite != null && mostFavorite.Any())
+                        {
+                            foreach (var product in mostFavorite)
+                            {
+                                <tr>
+                                    <td>@favoriteIndex</td>
+                                    <td>
+                                        <a href="@Url.Action("Edit", "Product", new { area = "Admin", id = product.ProductId })">
+                                            @product.ProductName
+                                        </a>
+                                    </td>
+                                    <td class="text-end">
+                                        <span class="badge bg-danger">
+                                            <i class="bi bi-heart-fill me-1"></i>@product.WishlistCount
+                                        </span>
+                                    </td>
+                                </tr>
+                                favoriteIndex++;
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">Chưa có dữ liệu</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thống kê khách hàng -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="stat-card customers">
+                <h3>Tổng số khách hàng</h3>
+                <p class="value">@ViewBag.TotalCustomers</p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="stat-card products">
+                <h3>Khách hàng mới tháng này</h3>
+                <p class="value">@ViewBag.NewCustomersThisMonth</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var revenueData = @Html.Raw(Json.Encode(ViewBag.RevenueByMonth));
+            var orderCountData = @Html.Raw(Json.Encode(ViewBag.OrderCountByMonth));
+            
+            var labels = Object.keys(revenueData);
+            var revenueValues = Object.values(revenueData);
+            var orderCountValues = Object.values(orderCountData);
+
+            var ctx = document.getElementById('revenueChart').getContext('2d');
+            var revenueChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Doanh thu (VNĐ)',
+                        data: revenueValues,
+                        backgroundColor: 'rgba(108, 122, 224, 0.7)',
+                        borderColor: 'rgba(108, 122, 224, 0.9)',
+                        borderWidth: 1,
+                        yAxisID: 'y'
+                    }, {
+                        label: 'Số đơn hàng',
+                        data: orderCountValues,
+                        type: 'line',
+                        backgroundColor: 'rgba(216, 107, 124, 0.2)',
+                        borderColor: 'rgba(216, 107, 124, 0.8)',
+                        borderWidth: 2,
+                        fill: false,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString('vi-VN') + ' đ';
+                                }
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.datasetIndex === 0) {
+                                        return 'Doanh thu: ' + context.parsed.y.toLocaleString('vi-VN') + ' đ';
+                                    } else {
+                                        return 'Số đơn: ' + context.parsed.y;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Xử lý thay đổi năm
+            $('#yearSelect').on('change', function() {
+                var year = $(this).val();
+                $.ajax({
+                    url: '@Url.Action("GetRevenueChartData", "Report", new { area = "Admin" })',
+                    type: 'GET',
+                    data: { year: year },
+                    success: function(response) {
+                        revenueChart.data.labels = response.labels;
+                        revenueChart.data.datasets[0].data = response.revenue;
+                        revenueChart.data.datasets[1].data = response.orderCount;
+                        revenueChart.update();
+                    }
+                });
+            });
+        });
+    </script>
+}
+

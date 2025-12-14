@@ -1,0 +1,146 @@
+@model List<E_Commerce.Dto.ReviewDto>
+@{
+    ViewBag.Title = "Đánh giá chờ duyệt";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="page-header mb-4">
+    <h1 class="page-title">Đánh giá chờ duyệt</h1>
+    <p class="text-muted">Các đánh giá đang chờ được duyệt</p>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Chờ duyệt (@(ViewBag.PendingCount ?? 0))</h5>
+        <a href="@Url.Action("Index", "Review", new { area = "Admin" })" class="btn btn-primary btn-sm">
+            <i class="bi bi-list me-1"></i>Tất cả đánh giá
+        </a>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Sản phẩm</th>
+                        <th>Người dùng</th>
+                        <th>Đánh giá</th>
+                        <th>Nội dung</th>
+                        <th>Ngày tạo</th>
+                        <th class="text-end">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var review in Model)
+                        {
+                            <tr>
+                                <td>@review.Id</td>
+                                <td>@(review.ProductName ?? "Product #" + review.ProductId)</td>
+                                <td>@(review.UserName ?? "User #" + review.UserId)</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= review.Rating)
+                                            {
+                                                <i class="bi bi-star-fill text-warning"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-star text-muted"></i>
+                                            }
+                                        }
+                                        <span class="ms-2">@review.Rating/5</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(review.Comment))
+                                    {
+                                        <span title="@review.Comment">
+                                            @(review.Comment.Length > 50 ? review.Comment.Substring(0, 50) + "..." : review.Comment)
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Không có nhận xét</span>
+                                    }
+                                </td>
+                                <td>@review.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="text-end" style="white-space: nowrap;">
+                                    <form action="@Url.Action("Approve", "Review", new { area = "Admin", id = review.Id })" method="post" style="display:inline-block;">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-success me-1" title="Duyệt">
+                                            <i class="bi bi-check-circle me-1"></i>Duyệt
+                                        </button>
+                                    </form>
+                                    <form action="@Url.Action("Delete", "Review", new { area = "Admin", id = review.Id })" method="post" class="delete-review-form" style="display:inline-block;">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Xóa">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-3">Không có đánh giá nào chờ duyệt</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/toastr.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.css" rel="stylesheet" />
+    <script>
+        $(function () {
+            toastr.options = {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-right",
+                timeOut: 3000,
+                extendedTimeOut: 1000
+            };
+
+            var successMessage = @Html.Raw(Json.Encode(TempData["SuccessMessage"] ?? ""));
+            var errorMessage = @Html.Raw(Json.Encode(TempData["ErrorMessage"] ?? ""));
+
+            if (successMessage) {
+                toastr.success(successMessage);
+            }
+            if (errorMessage) {
+                toastr.error(errorMessage);
+            }
+
+            // SweetAlert confirm before delete
+            $('.delete-review-form').on('submit', function (e) {
+                e.preventDefault();
+                var form = this;
+                Swal.fire({
+                    title: 'Xóa đánh giá?',
+                    text: 'Bạn có chắc chắn muốn xóa đánh giá này?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Xóa',
+                    cancelButtonText: 'Hủy'
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    </script>
+}

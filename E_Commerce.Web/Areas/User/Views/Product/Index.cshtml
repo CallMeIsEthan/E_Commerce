@@ -1,0 +1,665 @@
+@{
+    ViewBag.Title = "Danh mục sản phẩm";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+
+    var products = ViewBag.Products as List<E_Commerce.Dto.ProductDto> ?? new List<E_Commerce.Dto.ProductDto>();
+    var productMainImages = ViewBag.ProductMainImages as Dictionary<int, string> ?? new Dictionary<int, string>();
+    var productHoverImages = ViewBag.ProductHoverImages as Dictionary<int, string> ?? new Dictionary<int, string>();
+    var rootCategories = ViewBag.RootCategories as List<E_Commerce.Dto.CategoryDto> ?? new List<E_Commerce.Dto.CategoryDto>();
+    var allCategories = ViewBag.AllCategories as List<E_Commerce.Dto.CategoryDto> ?? new List<E_Commerce.Dto.CategoryDto>();
+    var brands = ViewBag.Brands as List<E_Commerce.Dto.BrandDto> ?? new List<E_Commerce.Dto.BrandDto>();
+    var categoryProductCounts = ViewBag.CategoryProductCounts as Dictionary<int, int> ?? new Dictionary<int, int>();
+    var brandProductCounts = ViewBag.BrandProductCounts as Dictionary<int, int> ?? new Dictionary<int, int>();
+    var maxProductPrice = ViewBag.MaxProductPrice as int? ?? 10000000;
+
+    var selectedCategoryId = ViewBag.SelectedCategoryId as int?;
+    var selectedBrandId = ViewBag.SelectedBrandId as int?;
+    var searchTerm = ViewBag.SearchTerm as string ?? "";
+    var minPrice = ViewBag.MinPrice as decimal?;
+    var maxPrice = ViewBag.MaxPrice as decimal?;
+    var sortBy = ViewBag.SortBy as string ?? "name";
+    var sortOrder = ViewBag.SortOrder as string ?? "asc";
+    var currentPage = ViewBag.CurrentPage as int? ?? 1;
+    var totalPages = ViewBag.TotalPages as int? ?? 1;
+    var totalProducts = ViewBag.TotalProducts as int? ?? 0;
+    var pageSize = ViewBag.PageSize as int? ?? 12;
+    var productRatings = ViewBag.ProductRatings as Dictionary<int, double> ?? new Dictionary<int, double>();
+    var productReviewCounts = ViewBag.ProductReviewCounts as Dictionary<int, int> ?? new Dictionary<int, int>();
+}
+
+<main class="main">
+    <!-- Page Title -->
+    <div class="page-title light-background">
+        <div class="container d-lg-flex justify-content-between align-items-center">
+            <h1 class="mb-2 mb-lg-0">Danh mục sản phẩm</h1>
+            <nav class="breadcrumbs">
+                <ol>
+                    <li><a href="@Url.Action("Index", "Home", new { area = "User" })">Trang chủ</a></li>
+                    <li class="current">Danh mục</li>
+                </ol>
+            </nav>
+        </div>
+    </div><!-- End Page Title -->
+
+    <div class="container">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-4 sidebar">
+                <div class="widgets-container">
+                    <!-- Product Categories Widget -->
+                    <div class="product-categories-widget widget-item">
+                        <h3 class="widget-title">Danh mục</h3>
+                        <ul class="category-tree list-unstyled mb-0">
+                            @foreach (var category in rootCategories)
+                            {
+                                var subCategories = allCategories.Where(c => c.ParentCategoryId == category.Id).ToList();
+                                var categoryId = $"categories-{category.Id}";
+                                var productCount = categoryProductCounts.ContainsKey(category.Id) ? categoryProductCounts[category.Id] : 0;
+
+                                <li class="category-item">
+                                    @if (subCategories.Any())
+                                    {
+                                        <div class="d-flex justify-content-between align-items-center category-header">
+                                            <button type="button" class="btn btn-link category-link p-0 text-start" data-bs-toggle="collapse" data-bs-target="#@categoryId-subcategories" aria-expanded="false" aria-controls="@categoryId-subcategories">
+                                                @category.Name
+                                            </button>
+                                            <button type="button" class="btn btn-link category-toggle p-0" data-bs-toggle="collapse" data-bs-target="#@categoryId-subcategories" aria-expanded="false" aria-controls="@categoryId-subcategories">
+                                                <i class="bi bi-chevron-down"></i>
+                                                <i class="bi bi-chevron-up d-none"></i>
+                                            </button>
+                                        </div>
+                                        <ul id="@categoryId-subcategories" class="subcategory-list list-unstyled collapse ps-3 mt-2">
+                                            @foreach (var subCat in subCategories)
+                                            {
+                                                <li><a href="@Url.Action("Index", "Product", new { area = "User", categoryId = subCat.Id })" class="subcategory-link">@subCat.Name</a></li>
+                                            }
+                                        </ul>
+                                    }
+                                    else
+                                    {
+                                        <div class="d-flex justify-content-between align-items-center category-header">
+                                            <a href="@Url.Action("Index", "Product", new { area = "User", categoryId = category.Id })" class="category-link">@category.Name</a>
+                                        </div>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    </div><!--/Product Categories Widget -->
+                    <!-- Pricing Range Widget -->
+                    <div class="pricing-range-widget widget-item">
+                        <h3 class="widget-title">Khoảng giá</h3>
+                        <div class="price-range-container">
+                            @{
+                                var defaultMaxPrice = maxPrice ?? maxProductPrice;
+                                var defaultMinPrice = minPrice ?? 0;
+                            }
+                            <form method="get" action="@Url.Action("Index", "Product", new { area = "User" })" id="priceRangeForm">
+                                @if (selectedCategoryId.HasValue)
+                                {
+                                    <input type="hidden" name="categoryId" value="@selectedCategoryId.Value" />
+                                }
+                                @if (selectedBrandId.HasValue)
+                                {
+                                    <input type="hidden" name="brandId" value="@selectedBrandId.Value" />
+                                }
+                                @if (!string.IsNullOrEmpty(searchTerm))
+                                {
+                                    <input type="hidden" name="searchTerm" value="@searchTerm" />
+                                }
+
+                                <div class="current-range mb-3">
+                                    <span class="min-price">@((int)defaultMinPrice).ToString("N0") đ</span>
+                                    <span class="max-price float-end">@((int)defaultMaxPrice).ToString("N0") đ</span>
+                                </div>
+
+                                <div class="range-slider">
+                                    <div class="slider-track"></div>
+                                    <div class="slider-progress"></div>
+                                    <input type="range" class="min-range" min="0" max="@maxProductPrice" value="@((int)defaultMinPrice)" step="10000">
+                                    <input type="range" class="max-range" min="0" max="@maxProductPrice" value="@((int)defaultMaxPrice)" step="10000">
+                                </div>
+
+                                <div class="price-inputs mt-3">
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text">đ</span>
+                                                <input type="number" class="form-control min-price-input" name="minPrice" placeholder="Tối thiểu" min="0" max="@maxProductPrice" value="@((int)defaultMinPrice)" step="10000">
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text">đ</span>
+                                                <input type="number" class="form-control max-price-input" name="maxPrice" placeholder="Tối đa" min="0" max="@maxProductPrice" value="@((int)defaultMaxPrice)" step="10000">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="filter-actions mt-3">
+                                    <button type="submit" class="btn btn-sm btn-primary w-100">Áp dụng</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div><!--/Pricing Range Widget -->
+                    <!-- Brand Filter Widget -->
+                    <div class="brand-filter-widget widget-item">
+                        <h3 class="widget-title">Lọc theo thương hiệu</h3>
+                        <div class="brand-filter-content">
+                            <div class="brand-list">
+                                @foreach (var brand in brands)
+                                {
+                                    var brandCount = brandProductCounts.ContainsKey(brand.Id) ? brandProductCounts[brand.Id] : 0;
+                                    <div class="brand-item">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="brandId" value="@brand.Id" id="brand-@brand.Id"
+                                                   @(selectedBrandId == brand.Id ? "checked" : "")
+                                                   onchange="this.form.submit()">
+                                            <label class="form-check-label" for="brand-@brand.Id">
+                                                @brand.Name
+                                                <span class="brand-count">(@brandCount)</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <form method="get" action="@Url.Action("Index", "Product", new { area = "User" })" id="brandFilterForm">
+                                @if (selectedCategoryId.HasValue)
+                                {
+                                    <input type="hidden" name="categoryId" value="@selectedCategoryId.Value" />
+                                }
+                                @if (!string.IsNullOrEmpty(searchTerm))
+                                {
+                                    <input type="hidden" name="searchTerm" value="@searchTerm" />
+                                }
+                                @if (minPrice.HasValue)
+                                {
+                                    <input type="hidden" name="minPrice" value="@minPrice.Value" />
+                                }
+                                @if (maxPrice.HasValue)
+                                {
+                                    <input type="hidden" name="maxPrice" value="@maxPrice.Value" />
+                                }
+                            </form>
+                        </div>
+                    </div><!--/Brand Filter Widget -->
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- Category Header Section -->
+                <section id="category-header" class="category-header section">
+                    <div class="container" data-aos="fade-up">
+                        <!-- Filter and Sort Options -->
+                        <div class="filter-container mb-4" data-aos="fade-up" data-aos-delay="100">
+                            <form method="get" action="@Url.Action("Index", "Product", new { area = "User" })">
+                                @if (selectedCategoryId.HasValue)
+                                {
+                                    <input type="hidden" name="categoryId" value="@selectedCategoryId.Value" />
+                                }
+                                @if (selectedBrandId.HasValue)
+                                {
+                                    <input type="hidden" name="brandId" value="@selectedBrandId.Value" />
+                                }
+                                @if (minPrice.HasValue)
+                                {
+                                    <input type="hidden" name="minPrice" value="@minPrice.Value" />
+                                }
+                                @if (maxPrice.HasValue)
+                                {
+                                    <input type="hidden" name="maxPrice" value="@maxPrice.Value" />
+                                }
+
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-6 col-lg-4">
+                                        <div class="filter-item search-form">
+                                            <label for="productSearch" class="form-label">Tìm kiếm sản phẩm</label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="productSearch" name="searchTerm" value="@searchTerm" placeholder="Tìm kiếm sản phẩm..." aria-label="Tìm kiếm sản phẩm">
+                                                <button class="btn search-btn" type="submit">
+                                                    <i class="bi bi-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-6 col-lg-2">
+                                        <div class="filter-item">
+                                            <label for="sortBy" class="form-label">Sắp xếp</label>
+                                            <select class="form-select" id="sortBy" name="sortBy" onchange="updateSortOrder(this)">
+                                                <option value="name" data-order="asc" @(sortBy == "name" ? "selected" : "")>Tên A-Z</option>
+                                                <option value="price" data-order="asc" @(sortBy == "price" && sortOrder == "asc" ? "selected" : "")>Giá: Thấp đến cao</option>
+                                                <option value="price" data-order="desc" @(sortBy == "price" && sortOrder == "desc" ? "selected" : "")>Giá: Cao đến thấp</option>
+                                                <option value="createdDate" data-order="desc" @(sortBy == "createdDate" ? "selected" : "")>Mới nhất</option>
+                                            </select>
+                                            <input type="hidden" name="sortOrder" id="sortOrder" value="@sortOrder">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-6 col-lg-4">
+                                        <div class="filter-item">
+                                            <label class="form-label">Hiển thị</label>
+                                            <div class="items-per-page">
+                                                <select class="form-select" id="itemsPerPage" name="pageSize" onchange="this.form.submit()" aria-label="Số sản phẩm mỗi trang">
+                                                    <option value="9" @(pageSize == 9 ? "selected" : "")>9 mỗi trang</option>
+                                                    <option value="18" @(pageSize == 18 ? "selected" : "")>18 mỗi trang</option>
+                                                    <option value="36" @(pageSize == 36 ? "selected" : "")>36 mỗi trang</option>
+                                                    <option value="72" @(pageSize == 72 ? "selected" : "")>72 mỗi trang</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+
+                            @if (selectedCategoryId.HasValue || selectedBrandId.HasValue || !string.IsNullOrEmpty(searchTerm) || minPrice.HasValue || maxPrice.HasValue)
+                            {
+                                <div class="row mt-3">
+                                    <div class="col-12" data-aos="fade-up" data-aos-delay="200">
+                                        <div class="active-filters">
+                                            <span class="active-filter-label">Bộ lọc đang áp dụng:</span>
+                                            <div class="filter-tags">
+                                                @if (selectedCategoryId.HasValue)
+                                                {
+                                                    var category = allCategories.FirstOrDefault(c => c.Id == selectedCategoryId.Value);
+                                                    if (category != null)
+                                                    {
+                                                        <span class="filter-tag">
+                                                            @category.Name
+                                                            <a href="@Url.Action("Index", "Product", new { area = "User", brandId = selectedBrandId, searchTerm = searchTerm, minPrice = minPrice, maxPrice = maxPrice })" class="filter-remove">
+                                                                <i class="bi bi-x"></i>
+                                                            </a>
+                                                        </span>
+                                                    }
+                                                }
+                                                @if (selectedBrandId.HasValue)
+                                                {
+                                                    var brand = brands.FirstOrDefault(b => b.Id == selectedBrandId.Value);
+                                                    if (brand != null)
+                                                    {
+                                                        <span class="filter-tag">
+                                                            @brand.Name
+                                                            <a href="@Url.Action("Index", "Product", new { area = "User", categoryId = selectedCategoryId, searchTerm = searchTerm, minPrice = minPrice, maxPrice = maxPrice })" class="filter-remove">
+                                                                <i class="bi bi-x"></i>
+                                                            </a>
+                                                        </span>
+                                                    }
+                                                }
+                                                @if (!string.IsNullOrEmpty(searchTerm))
+                                                {
+                                                    <span class="filter-tag">
+                                                        "@searchTerm"
+                                                        <a href="@Url.Action("Index", "Product", new { area = "User", categoryId = selectedCategoryId, brandId = selectedBrandId, minPrice = minPrice, maxPrice = maxPrice })" class="filter-remove">
+                                                            <i class="bi bi-x"></i>
+                                                        </a>
+                                                    </span>
+                                                }
+                                                @if (minPrice.HasValue || maxPrice.HasValue)
+                                                {
+                                                    <span class="filter-tag">
+                                                        @((minPrice ?? 0).ToString("N0")) đ - @((maxPrice ?? 10000000).ToString("N0")) đ
+                                                        <a href="@Url.Action("Index", "Product", new { area = "User", categoryId = selectedCategoryId, brandId = selectedBrandId, searchTerm = searchTerm })" class="filter-remove">
+                                                            <i class="bi bi-x"></i>
+                                                        </a>
+                                                    </span>
+                                                }
+                                                <a href="@Url.Action("Index", "Product", new { area = "User" })" class="clear-all-btn">Xóa tất cả</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </section><!-- /Category Header Section -->
+                <!-- Category Product List Section -->
+                <section id="category-product-list" class="category-product-list section">
+                    <div class="container" data-aos="fade-up" data-aos-delay="100">
+                        @if (products.Any())
+                        {
+                            <div class="row g-4 product-grid" id="productGrid">
+                                @foreach (var product in products)
+                                {
+                                    var productImage = productMainImages.ContainsKey(product.Id) ? productMainImages[product.Id] : null;
+                                    var hoverImage = productHoverImages.ContainsKey(product.Id) ? productHoverImages[product.Id] : null;
+                                    var discountPercent = product.CompareAtPrice.HasValue && product.CompareAtPrice > product.Price
+                                        ? (int)(((product.CompareAtPrice.Value - product.Price) / product.CompareAtPrice.Value) * 100)
+                                        : 0;
+
+                                    <div class="col-6 col-xl-4">
+                                        <div class="product-card" data-aos="zoom-in">
+                                            <div class="product-image">
+                                                @if (!string.IsNullOrEmpty(productImage))
+                                                {
+                                                    <img src="@productImage" class="main-image img-fluid" alt="@product.Name" loading="lazy">
+                                                    if (!string.IsNullOrEmpty(hoverImage))
+                                                    {
+                                                        <img src="@hoverImage" class="hover-image img-fluid" alt="@product.Name" loading="lazy">
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
+                                                        <i class="bi bi-image" style="font-size: 3rem; color: #ccc;"></i>
+                                                    </div>
+                                                }
+                                                <div class="product-overlay">
+                                                    <div class="product-actions">
+                                                        @{
+                                                            var wishlistProductIds = ViewBag.WishlistProductIds as HashSet<int> ?? new HashSet<int>();
+                                                            var isInWishlist = wishlistProductIds.Contains(product.Id);
+                                                        }
+                                                        <button type="button" class="action-btn wishlist-btn @(isInWishlist ? "active" : "")" title="Yêu thích" data-product-id="@product.Id">
+                                                            <i class="bi @(isInWishlist ? "bi-heart-fill text-danger" : "bi-heart")"></i>
+                                                        </button>
+                                                        <a href="@Url.Action("Details", "Product", new { id = product.Id, area = "User" })" class="action-btn" title="Xem chi tiết">
+                                                            <i class="bi bi-eye"></i>
+                                                        </a>
+                                                        <button type="button" class="action-btn add-to-cart-btn" title="Thêm vào giỏ" data-product-id="@product.Id">
+                                                            <i class="bi bi-cart-plus"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                @if (product.IsFeatured)
+                                                {
+                                                    <div class="product-badge new">Nổi bật</div>
+                                                }
+                                                else if (discountPercent > 0)
+                                                {
+                                                    <div class="product-badge sale">-@discountPercent%</div>
+                                                }
+                                            </div>
+                                            <div class="product-details">
+                                                <div class="product-category">@(product.CategoryName ?? "Sản phẩm")</div>
+                                                <h4 class="product-title">
+                                                    <a href="@Url.Action("Details", "Product", new { id = product.Id, area = "User" })">@product.Name</a>
+                                                </h4>
+                                                <div class="product-meta">
+                                                    <div class="product-price">
+                                                        @if (product.CompareAtPrice.HasValue && product.CompareAtPrice > product.Price)
+                                                        {
+                                                            <span>@product.Price.ToString("N0") đ</span>
+                                                            <span class="original-price">@product.CompareAtPrice.Value.ToString("N0") đ</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>@product.Price.ToString("N0") đ</span>
+                                                        }
+                                                    </div>
+                                                    @{
+                                                        var avgRating = productRatings.ContainsKey(product.Id) ? productRatings[product.Id] : 0;
+                                                        var reviewCount = productReviewCounts.ContainsKey(product.Id) ? productReviewCounts[product.Id] : 0;
+                                                    }
+                                                    <div class="product-rating">
+                                                        <i class="bi bi-star-fill"></i>
+                                                        @avgRating.ToString("0.0") <span>(@reviewCount)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-5">
+                                <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+                                <h4 class="mt-3">Không tìm thấy sản phẩm nào</h4>
+                                <p class="text-muted">Vui lòng thử lại với bộ lọc khác</p>
+                                <a href="@Url.Action("Index", "Product", new { area = "User" })" class="btn btn-primary mt-3">Xem tất cả sản phẩm</a>
+                            </div>
+                        }
+                    </div>
+                </section><!-- /Category Product List Section -->
+                <!-- Category Pagination Section -->
+                @if (totalPages > 1)
+                {
+                    <section id="category-pagination" class="category-pagination section">
+                        <div class="container">
+                            <nav class="d-flex justify-content-center" aria-label="Phân trang">
+                                <ul>
+                                    @if (currentPage > 1)
+                                    {
+                                        <li>
+                                            <a href="@Url.Action("Index", "Product", new { area = "User", categoryId = selectedCategoryId, brandId = selectedBrandId, searchTerm = searchTerm, minPrice = minPrice, maxPrice = maxPrice, sortBy = sortBy, sortOrder = sortOrder, page = currentPage - 1, pageSize = pageSize })" aria-label="Trang trước">
+                                                <i class="bi bi-arrow-left"></i>
+                                                <span class="d-none d-sm-inline">Trước</span>
+                                            </a>
+                                        </li>
+                                    }
+
+                                    @for (int i = 1; i <= totalPages; i++)
+                                    {
+                                        if (i == 1 || i == totalPages || (i >= currentPage - 2 && i <= currentPage + 2))
+                                        {
+                                            <li>
+                                                <a href="@Url.Action("Index", "Product", new { area = "User", categoryId = selectedCategoryId, brandId = selectedBrandId, searchTerm = searchTerm, minPrice = minPrice, maxPrice = maxPrice, sortBy = sortBy, sortOrder = sortOrder, page = i, pageSize = pageSize })"
+                                                   class="@(i == currentPage ? "active" : "")">@i</a>
+                                            </li>
+                                        }
+                                        else if (i == currentPage - 3 || i == currentPage + 3)
+                                        {
+                                            <li class="ellipsis">...</li>
+                                        }
+                                    }
+
+                                    @if (currentPage < totalPages)
+                                    {
+                                        <li>
+                                            <a href="@Url.Action("Index", "Product", new { area = "User", categoryId = selectedCategoryId, brandId = selectedBrandId, searchTerm = searchTerm, minPrice = minPrice, maxPrice = maxPrice, sortBy = sortBy, sortOrder = sortOrder, page = currentPage + 1, pageSize = pageSize })" aria-label="Trang sau">
+                                                <span class="d-none d-sm-inline">Sau</span>
+                                                <i class="bi bi-arrow-right"></i>
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </nav>
+                        </div>
+                    </section><!-- /Category Pagination Section -->
+                }
+            </div>
+        </div>
+    </div>
+</main>
+
+@section scripts {
+    <style>
+        /* Disable Bootstrap tooltips for product cards */
+        .product-card .tooltip,
+        .product-card .tooltip.show {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+        }
+        /* Use native title attribute instead */
+        .product-card .action-btn {
+            cursor: pointer;
+        }
+
+    </style>
+    <script>
+        // Expose sort handler globally for inline onchange
+        function updateSortOrder(select) {
+            var selectedOption = $(select).find('option:selected');
+            var sortOrder = selectedOption.data('order') || 'asc';
+            $('#sortOrder').val(sortOrder);
+            $(select).closest('form').submit();
+        }
+
+        $(document).ready(function () {
+            // Add to cart functionality from product list
+            $('.add-to-cart-btn').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                var productId = $(this).data('product-id');
+                var $btn = $(this);
+                
+                // Disable button during request
+                $btn.prop('disabled', true);
+                var originalHtml = $btn.html();
+                $btn.html('<i class="bi bi-hourglass-split"></i>');
+                
+                $.ajax({
+                    url: '@Url.Action("AddToCart", "Cart", new { area = "User" })',
+                    type: 'POST',
+                    data: {
+                        ProductId: productId,
+                        Quantity: 1,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Show success feedback
+                            $btn.html('<i class="bi bi-check-circle"></i>');
+                            $btn.css({
+                                'background-color': '#28a745',
+                                'color': 'white'
+                            });
+                            
+                            // Update cart count
+                            if (response.cartItemCount !== undefined) {
+                                $('#cart-count').text(response.cartItemCount).show();
+                            } else if (window.refreshCartCount) {
+                                window.refreshCartCount();
+                            }
+                            
+                            // Reset button after 2 seconds
+                            setTimeout(function() {
+                                $btn.html(originalHtml);
+                                $btn.css({
+                                    'background-color': '',
+                                    'color': ''
+                                });
+                                $btn.prop('disabled', false);
+                            }, 2000);
+                            
+                            // Show toast notification
+                            if (typeof toastr !== 'undefined') {
+                                toastr.success('Đã thêm sản phẩm vào giỏ hàng!', '', {
+                                    timeOut: 2000,
+                                    positionClass: 'toast-top-right'
+                                });
+                            }
+                        } else {
+                            $btn.html(originalHtml);
+                            $btn.prop('disabled', false);
+                            if (typeof toastr !== 'undefined') {
+                                toastr.error(response.message || 'Có lỗi xảy ra');
+                            }
+                        }
+                    },
+                    error: function() {
+                        $btn.html(originalHtml);
+                        $btn.prop('disabled', false);
+                        if (typeof toastr !== 'undefined') {
+                            toastr.error('Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng');
+                        }
+                    }
+                });
+            });
+
+
+            // Brand filter form submission
+            $('input[name="brandId"]').on('change', function () {
+                var form = $('#brandFilterForm');
+                var checkedBrands = $('input[name="brandId"]:checked').map(function () {
+                    return this.value;
+                }).get();
+
+                form.find('input[name="brandId"]').remove();
+                if (checkedBrands.length > 0) {
+                    form.append('<input type="hidden" name="brandId" value="' + checkedBrands[0] + '">');
+                }
+                form.submit();
+            });
+
+            // Category dropdown toggle - Let Bootstrap handle collapse, we just update icons
+            $('.subcategory-list').on('show.bs.collapse', function () {
+                var targetId = '#' + $(this).attr('id');
+                var $buttons = $('[data-bs-target="' + targetId + '"]');
+                $buttons.find('.bi-chevron-down').addClass('d-none');
+                $buttons.find('.bi-chevron-up').removeClass('d-none');
+                $buttons.attr('aria-expanded', 'true');
+            });
+
+            $('.subcategory-list').on('hide.bs.collapse', function () {
+                var targetId = '#' + $(this).attr('id');
+                var $buttons = $('[data-bs-target="' + targetId + '"]');
+                $buttons.find('.bi-chevron-down').removeClass('d-none');
+                $buttons.find('.bi-chevron-up').addClass('d-none');
+                $buttons.attr('aria-expanded', 'false');
+            });
+
+            // Initialize icons state on page load
+            $('.subcategory-list').each(function () {
+                var $list = $(this);
+                if ($list.hasClass('show')) {
+                    var targetId = '#' + $list.attr('id');
+                    var $buttons = $('[data-bs-target="' + targetId + '"]');
+                    $buttons.find('.bi-chevron-down').addClass('d-none');
+                    $buttons.find('.bi-chevron-up').removeClass('d-none');
+                    $buttons.attr('aria-expanded', 'true');
+                }
+            });
+
+            // Price Range Slider
+            const priceRangeWidget = document.querySelector('.price-range-container');
+            if (priceRangeWidget) {
+                const sliderProgress = priceRangeWidget.querySelector('.slider-progress');
+                const minRange = priceRangeWidget.querySelector('.min-range');
+                const maxRange = priceRangeWidget.querySelector('.max-range');
+                const minPriceInput = priceRangeWidget.querySelector('.min-price-input');
+                const maxPriceInput = priceRangeWidget.querySelector('.max-price-input');
+                const minPriceDisplay = priceRangeWidget.querySelector('.min-price');
+                const maxPriceDisplay = priceRangeWidget.querySelector('.max-price');
+                const maxValue = parseInt(maxRange.max);
+
+                function updateSlider() {
+                    const minVal = parseInt(minRange.value);
+                    const maxVal = parseInt(maxRange.value);
+
+                    if (minVal > maxVal) {
+                        minRange.value = maxVal;
+                        maxRange.value = minVal;
+                        minPriceInput.value = maxVal;
+                        maxPriceInput.value = minVal;
+                    } else {
+                        minPriceInput.value = minVal;
+                        maxPriceInput.value = maxVal;
+                    }
+
+                    const minPercent = (minVal / maxValue) * 100;
+                    const maxPercent = (maxVal / maxValue) * 100;
+                    sliderProgress.style.left = minPercent + '%';
+                    sliderProgress.style.width = (maxPercent - minPercent) + '%';
+
+                    minPriceDisplay.textContent = minVal.toLocaleString('vi-VN') + ' đ';
+                    maxPriceDisplay.textContent = maxVal.toLocaleString('vi-VN') + ' đ';
+                }
+
+                minRange.addEventListener('input', updateSlider);
+                maxRange.addEventListener('input', updateSlider);
+                minPriceInput.addEventListener('input', function () {
+                    var val = parseInt(this.value);
+                    if (val < 0) val = 0;
+                    if (val > maxValue) val = maxValue;
+                    minRange.value = val;
+                    updateSlider();
+                });
+                maxPriceInput.addEventListener('input', function () {
+                    var val = parseInt(this.value);
+                    if (val < 0) val = 0;
+                    if (val > maxValue) val = maxValue;
+                    maxRange.value = val;
+                    updateSlider();
+                });
+
+                updateSlider();
+            }
+        });
+    </script>
+    @Html.AntiForgeryToken()
+}

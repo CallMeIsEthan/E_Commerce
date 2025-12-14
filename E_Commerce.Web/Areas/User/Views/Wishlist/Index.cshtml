@@ -1,0 +1,370 @@
+@model IEnumerable<E_Commerce.Dto.WishlistDto>
+@using System.Linq
+@{
+    ViewBag.Title = "Yêu thích";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+    var hasItems = Model != null && Model.Any();
+    var productMainImages = ViewBag.ProductMainImages as Dictionary<int, string> ?? new Dictionary<int, string>();
+    var productHoverImages = ViewBag.ProductHoverImages as Dictionary<int, string> ?? new Dictionary<int, string>();
+}
+
+<main class="main">
+    <div class="page-title light-background">
+        <div class="container d-lg-flex justify-content-between align-items-center">
+            <h1 class="mb-2 mb-lg-0">Danh sách yêu thích</h1>
+            <nav class="breadcrumbs">
+                <ol>
+                    <li><a href="@Url.Action("Index", "Home", new { area = "User" })">Trang chủ</a></li>
+                    <li class="current">Yêu thích</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <section class="section category-product-list">
+        <div class="container" data-aos="fade-up">
+            <div class="d-flex justify-content-between align-items-center mb-5">
+                <div>
+                    <h2 class="mb-2">Sản phẩm yêu thích của bạn</h2>
+                    <p class="text-muted mb-0">Những sản phẩm bạn đã lưu để xem sau</p>
+                </div>
+                @if (hasItems)
+                {
+                    <div class="text-end">
+                        <span class="badge bg-primary rounded-pill px-3 py-2 fs-6">
+                            <i class="bi bi-heart-fill me-1"></i> @Model.Count() sản phẩm
+                        </span>
+                    </div>
+                }
+            </div>
+
+            @if (hasItems)
+            {
+                <div class="row g-4 product-grid" id="wishlist-list">
+                    @foreach (var item in Model)
+                    {
+                        <div class="col-6 col-xl-4 wishlist-card" data-product-id="@item.ProductId" data-aos="zoom-in" data-aos-delay="@(Model.ToList().IndexOf(item) * 50)">
+                            <div class="product-card">
+                                <div class="product-image">
+                                    <a href="@Url.Action("Details", "Product", new { area = "User", id = item.ProductId })">
+                                        @{
+                                            var productImage = productMainImages.ContainsKey(item.ProductId) ? productMainImages[item.ProductId] : item.ProductImage;
+                                            var hoverImage = productHoverImages.ContainsKey(item.ProductId) ? productHoverImages[item.ProductId] : null;
+                                        }
+                                        @if (!string.IsNullOrEmpty(productImage))
+                                        {
+                                            <img src="@productImage" class="main-image img-fluid" alt="@item.ProductName" loading="lazy">
+                                            if (!string.IsNullOrEmpty(hoverImage))
+                                            {
+                                                <img src="@hoverImage" class="hover-image img-fluid" alt="@item.ProductName" loading="lazy">
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
+                                                <i class="bi bi-image" style="font-size: 3rem; color: #ccc;"></i>
+                                            </div>
+                                        }
+                                    </a>
+                                    <div class="product-overlay">
+                                        <div class="product-actions">
+                                            <button class="action-btn wishlist-remove-btn active" 
+                                                    title="Xóa khỏi yêu thích"
+                                                    data-product-id="@item.ProductId">
+                                                <i class="bi bi-heart-fill text-danger"></i>
+                                            </button>
+                                            <a href="@Url.Action("Details", "Product", new { area = "User", id = item.ProductId })" 
+                                               class="action-btn" 
+                                               title="Xem chi tiết">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <button class="action-btn wishlist-add-to-cart" 
+                                                    title="Thêm vào giỏ"
+                                                    data-product-id="@item.ProductId">
+                                                <i class="bi bi-cart-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="product-details">
+                                    <div class="product-category">Sản phẩm yêu thích</div>
+                                    <h4 class="product-title">
+                                        <a href="@Url.Action("Details", "Product", new { area = "User", id = item.ProductId })">@item.ProductName</a>
+                                    </h4>
+                                    <div class="product-meta">
+                                        <div class="product-price">
+                                            <span>@item.ProductPrice.ToString("N0") đ</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5" id="wishlist-empty" data-aos="fade-up">
+                    <div class="empty-wishlist-icon mb-4">
+                        <i class="bi bi-heart" style="font-size: 5rem; color: #e0e0e0;"></i>
+                    </div>
+                    <h3 class="mb-3">Danh sách yêu thích đang trống</h3>
+                    <p class="text-muted mb-4" style="max-width: 500px; margin: 0 auto;">
+                        Bạn chưa có sản phẩm nào trong danh sách yêu thích. Hãy khám phá và thêm những sản phẩm bạn thích vào đây để dễ dàng tìm lại sau.
+                    </p>
+                    <a href="@Url.Action("Index", "Product", new { area = "User" })" class="btn btn-primary btn-lg mt-3">
+                        <i class="bi bi-bag me-2"></i> Bắt đầu mua sắm
+                    </a>
+                </div>
+            }
+        </div>
+    </section>
+</main>
+
+<form id="wishlist-token" class="d-none">
+    @Html.AntiForgeryToken()
+</form>
+
+@section scripts {
+    <style>
+        /* Wishlist specific overrides - using main.css styles as base */
+        .wishlist-card.removing {
+            animation: fadeOut 0.3s ease-out forwards;
+        }
+
+        @@keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+        }
+
+        .empty-wishlist-icon {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @@keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        /* Override wishlist remove button to show as active (red heart) */
+        .category-product-list .product-actions .wishlist-remove-btn.active {
+            background: var(--surface-color);
+        }
+
+        .category-product-list .product-actions .wishlist-remove-btn.active:hover {
+            background: rgba(220, 53, 69, 0.1);
+        }
+
+        .category-product-list .product-actions .wishlist-remove-btn.active i {
+            color: #dc3545 !important;
+        }
+    </style>
+    <script>
+        (function () {
+            var token = $('#wishlist-token input[name="__RequestVerificationToken"]').val();
+
+            function updateHeaderCount(count) {
+                $('#wishlist-count').text(count || 0).show();
+            }
+
+            function handleEmptyState() {
+                if ($('#wishlist-list').find('.wishlist-card').length === 0) {
+                    var emptyHtml = `
+                        <div class="text-center py-5" id="wishlist-empty" data-aos="fade-up">
+                            <div class="empty-wishlist-icon mb-4">
+                                <i class="bi bi-heart" style="font-size: 5rem; color: #e0e0e0;"></i>
+                            </div>
+                            <h3 class="mb-3">Danh sách yêu thích đang trống</h3>
+                            <p class="text-muted mb-4" style="max-width: 500px; margin: 0 auto;">
+                                Bạn chưa có sản phẩm nào trong danh sách yêu thích. Hãy khám phá và thêm những sản phẩm bạn thích vào đây để dễ dàng tìm lại sau.
+                            </p>
+                            <a href="@Url.Action("Index", "Product", new { area = "User" })" class="btn btn-primary btn-lg mt-3">
+                                <i class="bi bi-bag me-2"></i> Bắt đầu mua sắm
+                            </a>
+                        </div>
+                    `;
+                    $('#wishlist-list').parent().html(emptyHtml);
+                }
+            }
+
+            $(document).on('click', '.wishlist-remove-btn', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                var productId = $(this).data('product-id');
+                var $card = $('.wishlist-card[data-product-id="' + productId + '"]');
+                var $btn = $(this);
+
+                var doRemove = function () {
+                    $card.addClass('removing');
+                    
+                    $.ajax({
+                        url: '@Url.Action("Remove", "Wishlist", new { area = "User" })',
+                        type: 'POST',
+                        data: {
+                            productId: productId,
+                            __RequestVerificationToken: token
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                setTimeout(function() {
+                                    $card.fadeOut(300, function() {
+                                        $(this).remove();
+                                        handleEmptyState();
+                                    });
+                                }, 300);
+                                
+                                updateHeaderCount(response.count);
+                                
+                                if (typeof toastr !== 'undefined') {
+                                    toastr.success(response.message || 'Đã xóa khỏi yêu thích.');
+                                }
+                            } else if (response.message) {
+                                $card.removeClass('removing');
+                                if (typeof toastr !== 'undefined') {
+                                    toastr.error(response.message);
+                                }
+                            }
+                        },
+                        error: function () {
+                            $card.removeClass('removing');
+                            if (typeof toastr !== 'undefined') {
+                                toastr.error('Không thể xóa, vui lòng thử lại.');
+                            }
+                        }
+                    });
+                };
+
+                // Không cần confirm, click là xóa luôn (UX tốt hơn)
+                doRemove();
+            });
+
+            $(document).on('click', '.wishlist-add-to-cart', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                var productId = $(this).data('product-id');
+                var $btn = $(this);
+                var originalHtml = $btn.html();
+                
+                $btn.prop('disabled', true)
+                    .css('opacity', '0.6')
+                    .html('<i class="bi bi-hourglass-split"></i>');
+
+                // Kiểm tra xem sản phẩm có variants không
+                $.ajax({
+                    url: '@Url.Action("CheckHasVariants", "Wishlist", new { area = "User" })',
+                    type: 'GET',
+                    data: { productId: productId },
+                    success: function (checkResponse) {
+                        // Nếu sản phẩm có variants, chuyển đến trang chi tiết để chọn màu/size
+                        if (checkResponse.hasVariants && checkResponse.variantCount > 0) {
+                            $btn.html(originalHtml).css('opacity', '1').prop('disabled', false);
+                            if (typeof toastr !== 'undefined') {
+                                toastr.info('Vui lòng chọn màu và size trên trang chi tiết sản phẩm.');
+                            }
+                            // Chuyển đến trang chi tiết sản phẩm
+                            window.location.href = '@Url.Action("Details", "Product", new { area = "User" })?id=' + productId;
+                            return;
+                        }
+
+                        // Nếu không có variants, thêm trực tiếp vào giỏ hàng
+                        $.ajax({
+                            url: '@Url.Action("AddToCart", "Cart", new { area = "User" })',
+                            type: 'POST',
+                            data: {
+                                ProductId: productId,
+                                Quantity: 1,
+                                __RequestVerificationToken: token
+                            },
+                            success: function (response) {
+                                if (response.success) {
+                                    if (response.cartItemCount !== undefined) {
+                                        $('#cart-count').text(response.cartItemCount).show();
+                                    } else if (window.refreshCartCount) {
+                                        window.refreshCartCount();
+                                    }
+                                    if (typeof toastr !== 'undefined') {
+                                        toastr.success(response.message || 'Đã thêm vào giỏ hàng.');
+                                    }
+                                    
+                                    // Visual feedback
+                                    $btn.html('<i class="bi bi-check-circle-fill text-success"></i>')
+                                        .css('opacity', '1');
+                                    setTimeout(function() {
+                                        $btn.html(originalHtml).css('opacity', '1');
+                                    }, 1500);
+                                } else if (response.message) {
+                                    if (typeof toastr !== 'undefined') {
+                                        toastr.error(response.message);
+                                    }
+                                    $btn.html(originalHtml).css('opacity', '1');
+                                }
+                            },
+                            error: function () {
+                                if (typeof toastr !== 'undefined') {
+                                    toastr.error('Không thể thêm vào giỏ, vui lòng thử lại.');
+                                }
+                                $btn.html(originalHtml).css('opacity', '1');
+                            },
+                            complete: function () {
+                                $btn.prop('disabled', false);
+                            }
+                        });
+                    },
+                    error: function () {
+                        // Nếu không kiểm tra được, vẫn thử thêm vào giỏ (fallback)
+                        $.ajax({
+                            url: '@Url.Action("AddToCart", "Cart", new { area = "User" })',
+                            type: 'POST',
+                            data: {
+                                ProductId: productId,
+                                Quantity: 1,
+                                __RequestVerificationToken: token
+                            },
+                            success: function (response) {
+                                if (response.success) {
+                                    if (response.cartItemCount !== undefined) {
+                                        $('#cart-count').text(response.cartItemCount).show();
+                                    } else if (window.refreshCartCount) {
+                                        window.refreshCartCount();
+                                    }
+                                    if (typeof toastr !== 'undefined') {
+                                        toastr.success(response.message || 'Đã thêm vào giỏ hàng.');
+                                    }
+                                    
+                                    $btn.html('<i class="bi bi-check-circle-fill text-success"></i>')
+                                        .css('opacity', '1');
+                                    setTimeout(function() {
+                                        $btn.html(originalHtml).css('opacity', '1');
+                                    }, 1500);
+                                } else if (response.message) {
+                                    if (typeof toastr !== 'undefined') {
+                                        toastr.error(response.message);
+                                    }
+                                    $btn.html(originalHtml).css('opacity', '1');
+                                }
+                            },
+                            error: function () {
+                                if (typeof toastr !== 'undefined') {
+                                    toastr.error('Không thể thêm vào giỏ, vui lòng thử lại.');
+                                }
+                                $btn.html(originalHtml).css('opacity', '1');
+                            },
+                            complete: function () {
+                                $btn.prop('disabled', false);
+                            }
+                        });
+                    }
+                });
+            });
+        })();
+    </script>
+}
+

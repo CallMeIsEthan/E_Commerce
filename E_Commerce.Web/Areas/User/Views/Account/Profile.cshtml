@@ -1,0 +1,179 @@
+@model E_Commerce.Web.ViewModels.UserProfileViewModel
+@{
+    ViewBag.Title = "Thông tin tài khoản";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+
+<main class="main">
+    <div class="page-title light-background">
+        <div class="container d-lg-flex justify-content-between align-items-center">
+            <h1 class="mb-2 mb-lg-0">Thông tin tài khoản</h1>
+            <nav class="breadcrumbs">
+                <ol>
+                    <li><a href="@Url.Action("Index", "Home", new { area = "User" })">Trang chủ</a></li>
+                    <li class="current">Tài khoản</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <section class="section">
+        <div class="container">
+            @Html.AntiForgeryToken()
+            <div class="row g-4">
+                <div class="col-lg-7">
+                    <div class="card profile-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-0">Thông tin cá nhân</h5>
+                                <small class="text-muted">Cập nhật họ tên, điện thoại, địa chỉ giao hàng</small>
+                            </div>
+                            <span class="badge bg-dark text-white">Profile</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">Email (không thay đổi)</label>
+                                <input type="email" class="form-control" value="@Model.Email" readonly />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Họ và tên</label>
+                                <input type="text" class="form-control" id="FullName" name="FullName" value="@Model.FullName" placeholder="Nhập họ và tên" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Số điện thoại</label>
+                                <input type="text" class="form-control" id="Phone" name="Phone" value="@Model.Phone" placeholder="Nhập số điện thoại" />
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">Địa chỉ</label>
+                                <textarea class="form-control" id="Address" name="Address" rows="2" placeholder="Nhập địa chỉ giao hàng">@Model.Address</textarea>
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-dark" id="btnSaveProfile">
+                                    <i class="bi bi-save me-1"></i>Lưu thay đổi
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="card password-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-0">Đổi mật khẩu</h5>
+                                <small class="text-muted">Tối thiểu 6 ký tự</small>
+                            </div>
+                            <i class="bi bi-shield-lock"></i>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">Mật khẩu hiện tại</label>
+                                <input type="password" class="form-control" id="OldPassword" autocomplete="off" value="" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Mật khẩu mới</label>
+                                <input type="password" class="form-control" id="NewPassword" autocomplete="new-password" value="" />
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">Xác nhận mật khẩu mới</label>
+                                <input type="password" class="form-control" id="ConfirmPassword" autocomplete="new-password" value="" />
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-outline-dark" id="btnChangePassword">
+                                    <i class="bi bi-lock-fill me-1"></i>Đổi mật khẩu
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+@section scripts {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        toastr.options = {
+            closeButton: true,
+            progressBar: true,
+            positionClass: "toast-top-right",
+            timeOut: 3000
+        };
+
+        $('#btnSaveProfile').on('click', function () {
+            var payload = {
+                Email: '@Model.Email',
+                FullName: $('#FullName').val(),
+                Phone: $('#Phone').val(),
+                Address: $('#Address').val(),
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+            };
+
+            $.ajax({
+                url: '@Url.Action("Profile", "Account", new { area = "User" })',
+                type: 'POST',
+                data: payload,
+                success: function (res) {
+                    if (res.success) {
+                        toastr.success(res.message || 'Đã lưu thông tin');
+                    } else {
+                        toastr.error(res.message || 'Không thể lưu thông tin');
+                    }
+                },
+                error: function () {
+                    toastr.error('Có lỗi xảy ra, vui lòng thử lại');
+                }
+            });
+        });
+
+        $('#btnChangePassword').on('click', function () {
+            var payload = {
+                oldPassword: $('#OldPassword').val(),
+                newPassword: $('#NewPassword').val(),
+                confirmPassword: $('#ConfirmPassword').val(),
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+            };
+
+            $.ajax({
+                url: '@Url.Action("ChangePassword", "Account", new { area = "User" })',
+                type: 'POST',
+                data: payload,
+                success: function (res) {
+                    if (res.success) {
+                        toastr.success(res.message || 'Đổi mật khẩu thành công');
+                        $('#OldPassword, #NewPassword, #ConfirmPassword').val('');
+                    } else {
+                        toastr.error(res.message || 'Không thể đổi mật khẩu');
+                    }
+                },
+                error: function () {
+                    toastr.error('Có lỗi xảy ra, vui lòng thử lại');
+                }
+            });
+        });
+    </script>
+}
+
+@section styles {
+    <style>
+        .profile-card, .password-card {
+            border: 1px solid #e6e6e6;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.04);
+            border-radius: 14px;
+        }
+        .card-header {
+            background: #f9f9f9;
+            border-bottom: 1px solid #eee;
+            border-radius: 14px 14px 0 0;
+        }
+        .btn-dark, .btn-outline-dark {
+            border-radius: 10px;
+        }
+        .form-control, textarea.form-control {
+            border-radius: 10px;
+        }
+    </style>
+}
+

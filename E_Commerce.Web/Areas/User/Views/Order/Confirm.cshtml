@@ -1,0 +1,567 @@
+@model E_Commerce.Dto.OrderDto
+@{
+    ViewBag.Title = "Xác nhận đơn hàng";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+
+<main class="main">
+    <!-- Page Title -->
+    <div class="page-title light-background">
+        <div class="container d-lg-flex justify-content-between align-items-center">
+            <h1 class="mb-2 mb-lg-0">Xác nhận đơn hàng</h1>
+            <nav class="breadcrumbs">
+                <ol>
+                    <li><a href="@Url.Action("Index", "Home", new { area = "User" })">Trang chủ</a></li>
+                    <li class="current">Xác nhận đơn hàng</li>
+                </ol>
+            </nav>
+        </div>
+    </div><!-- End Page Title -->
+
+    <!-- Order Confirmation Section -->
+    <section id="order-confirmation" class="order-confirmation section">
+        <div class="container">
+            <div class="order-confirmation-3">
+                <div class="row g-0">
+                    <!-- Left sidebar with order summary -->
+                    <div class="col-lg-4 sidebar">
+                        <div class="sidebar-content">
+                            <!-- Success animation -->
+                            <div class="success-animation">
+                                <i class="bi bi-check-lg"></i>
+                            </div>
+
+                            <!-- Order number and date -->
+                            <div class="order-id">
+                                <h4>Đơn hàng #@Model.OrderNumber</h4>
+                                <div class="order-date">@Model.OrderDate.ToString("dd MMMM, yyyy", new System.Globalization.CultureInfo("vi-VN"))</div>
+                            </div>
+
+                            <!-- Order progress stepper -->
+                            @{
+                                var status = (Model.Status ?? "").ToLowerInvariant();
+                                bool step1Completed = status == "processing" || status == "shipping" || status == "delivered" || status == "completed";
+                                bool step1Current = !step1Completed && status == "pending"; // Mới đặt hàng
+
+                                bool step2Completed = status == "shipping" || status == "delivered" || status == "completed";
+                                bool step2Current = !step2Completed && status == "processing";
+
+                                bool step3Completed = status == "delivered" || status == "completed";
+                                bool step3Current = !step3Completed && status == "shipping";
+
+                                bool step4Completed = status == "completed";
+                                bool step4Current = !step4Completed && status == "delivered";
+                            }
+                            <div class="order-progress">
+                                <div class="stepper-container">
+                                    <div class="stepper-item @(step1Completed ? "completed" : (step1Current ? "current" : ""))">
+                                        <div class="stepper-icon">1</div>
+                                        <div class="stepper-text">Chờ xác nhận</div>
+                                    </div>
+                                    <div class="stepper-item @(step2Completed ? "completed" : (step2Current ? "current" : ""))">
+                                        <div class="stepper-icon">2</div>
+                                        <div class="stepper-text">Đang xử lý</div>
+                                    </div>
+                                    <div class="stepper-item @(step3Completed ? "completed" : (step3Current ? "current" : ""))">
+                                        <div class="stepper-icon">3</div>
+                                        <div class="stepper-text">Đang giao hàng</div>
+                                    </div>
+                                    <div class="stepper-item @(step4Completed ? "completed" : (step4Current ? "current" : ""))">
+                                        <div class="stepper-icon">4</div>
+                                        <div class="stepper-text">Đã nhận hàng</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Price summary -->
+                            <div class="price-summary">
+                                <h5>Tóm tắt đơn hàng</h5>
+                                <ul class="summary-list">
+                                    <li>
+                                        <span>Tạm tính</span>
+                                        <span>@Model.SubTotal.ToString("N0")<u>đ</u></span>
+                                    </li>
+                                    <li>
+                                        <span>Phí vận chuyển</span>
+                                        <span>@(Model.ShippingFee == 0 ? "Miễn phí" : Model.ShippingFee.ToString("N0") + "đ")</span>
+                                    </li>
+                                    <li>
+                                        <span>Thuế VAT (10%)</span>
+                                        <span>@Model.TaxAmount.ToString("N0")<u>đ</u></span>
+                                    </li>
+                                    <li class="total">
+                                        <span>Tổng cộng</span>
+                                        <span>@Model.TotalAmount.ToString("N0")<u>đ</u></span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Delivery info -->
+                            <div class="delivery-info">
+                                <h5>Thông tin giao hàng</h5>
+                                <p class="delivery-estimate">
+                                    <i class="bi bi-calendar-check"></i>
+                                    <span>Ước tính giao hàng: 3-5 ngày làm việc</span>
+                                </p>
+                                <p class="shipping-method">
+                                    <i class="bi bi-truck"></i>
+                                    <span>@(Model.ShippingFee == 0 ? "Miễn phí vận chuyển" : "Vận chuyển tiêu chuẩn")</span>
+                                </p>
+                            </div>
+
+                            <!-- Customer service -->
+                            <div class="customer-service">
+                                <h5>Cần hỗ trợ?</h5>
+                                <a href="@Url.Action("Index", "Home", new { area = "User" })" class="help-link">
+                                    <i class="bi bi-chat-dots"></i>
+                                    <span>Liên hệ hỗ trợ</span>
+                                </a>
+                                <a href="@Url.Action("MyOrders", "Order", new { area = "User" })" class="help-link">
+                                    <i class="bi bi-question-circle"></i>
+                                    <span>Xem đơn hàng của tôi</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main content area -->
+                    <div class="col-lg-8 main-content">
+                        <!-- Thank you message -->
+                        <div class="thank-you-message">
+                            <h1>Cảm ơn bạn đã đặt hàng!</h1>
+                            <p>Chúng tôi đã nhận được đơn hàng của bạn và sẽ bắt đầu xử lý ngay. Chúng tôi sẽ gửi cập nhật qua email khi đơn hàng được xử lý.</p>
+                        </div>
+
+                        <!-- Shipping details -->
+                        <div class="details-card">
+                            <div class="card-header" data-toggle="collapse">
+                                <h3>
+                                    <i class="bi bi-geo-alt"></i>
+                                    Thông tin giao hàng
+                                </h3>
+                                <i class="bi bi-chevron-down toggle-icon"></i>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <div class="detail-group">
+                                            <label>Giao đến</label>
+                                            <address>
+                                                @Model.ShippingName<br>
+                                                @Model.ShippingAddress<br>
+                                                <br>
+                                                Việt Nam
+                                            </address>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="detail-group">
+                                            <label>Liên hệ</label>
+                                            <div class="contact-info">
+                                                <p><i class="bi bi-telephone"></i> @Model.ShippingPhone</p>
+                                                @if (!string.IsNullOrEmpty(ViewBag.UserEmail as string))
+                                                {
+                                                    <p><i class="bi bi-envelope"></i> @ViewBag.UserEmail</p>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment details -->
+                        <div class="details-card">
+                            <div class="card-header" data-toggle="collapse">
+                                <h3>
+                                    <i class="bi bi-credit-card"></i>
+                                    Thông tin thanh toán
+                                </h3>
+                                <i class="bi bi-chevron-down toggle-icon"></i>
+                            </div>
+                            <div class="card-body">
+                                <div class="payment-method">
+                                    <div class="payment-icon">
+                                        @if (Model.PaymentMethod == "COD")
+                                        {
+                                            <i class="bi bi-cash"></i>
+                                        }
+                                        else if (Model.PaymentMethod == "BankTransfer")
+                                        {
+                                            <i class="bi bi-bank"></i>
+                                        }
+                                        else if (Model.PaymentMethod == "CreditCard")
+                                        {
+                                            <i class="bi bi-credit-card-2-front"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-wallet2"></i>
+                                        }
+                                    </div>
+                                    <div class="payment-details">
+                                        <div class="card-type">
+                                            @if (Model.PaymentMethod == "COD")
+                                            {
+                                                <text>Thanh toán khi nhận hàng</text>
+                                            }
+                                            else if (Model.PaymentMethod == "BankTransfer")
+                                            {
+                                                <text>Chuyển khoản ngân hàng</text>
+                                            }
+                                            else if (Model.PaymentMethod == "CreditCard")
+                                            {
+                                                <text>Thẻ tín dụng/Ghi nợ</text>
+                                            }
+                                            else
+                                            {
+                                                <text>@Model.PaymentMethod</text>
+                                            }
+                                        </div>
+                                        <div class="card-number d-flex align-items-center gap-2 flex-wrap">
+                                            @if (Model.PaymentStatus == "Pending")
+                                            {
+                                                <span class="badge bg-warning">Chờ thanh toán</span>
+                                            }
+                                            else if (Model.PaymentStatus == "Paid")
+                                            {
+                                                <span class="badge bg-success">Đã thanh toán</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">@Model.PaymentStatus</span>
+                                            }
+                                            @if (Model.PaymentStatus == "Paid" && Model.Status != null && !Model.Status.ToLower().Contains("complete"))
+                                            {
+                                                <button type="button" class="btn btn-outline-success btn-sm" id="btnConfirmReceived">
+                                                    <i class="bi bi-check-circle me-1"></i>Đã nhận hàng
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order items -->
+                        <div class="details-card">
+                            <div class="card-header" data-toggle="collapse">
+                                <h3>
+                                    <i class="bi bi-bag-check"></i>
+                                    Chi tiết đơn hàng
+                                </h3>
+                                <i class="bi bi-chevron-down toggle-icon"></i>
+                            </div>
+                            <div class="card-body">
+                                @if (Model.OrderDetails != null && Model.OrderDetails.Any())
+                                {
+                                    foreach (var item in Model.OrderDetails)
+                                    {
+                                        <div class="item">
+                                            <div class="item-image">
+                                                @{
+                                                    var productImageUrl = !string.IsNullOrEmpty(item.ProductImage) 
+                                                        ? item.ProductImage 
+                                                        : Url.Content("~/Content/images/default-product.png");
+
+                                                    if (!string.IsNullOrEmpty(item.ProductImage))
+                                                    {
+                                                        var lower = item.ProductImage.ToLowerInvariant();
+                                                        var isAbsolute = lower.StartsWith("http://") || lower.StartsWith("https://") || lower.StartsWith("//");
+                                                        var isRooted = item.ProductImage.StartsWith("/") || item.ProductImage.StartsWith("~");
+                                                        
+                                                        // Nếu là URL tuyệt đối thì giữ nguyên; nếu đã có "/" hoặc "~" cũng giữ nguyên.
+                                                        // Nếu là đường dẫn tương đối (không protocol, không "/" hoặc "~") thì thêm "/" để tránh 404.
+                                                        if (!isAbsolute && !isRooted)
+                                                        {
+                                                            productImageUrl = "/" + item.ProductImage.TrimStart('/');
+                                                        }
+                                                    }
+
+                                                    // Cuối cùng đảm bảo Url.Content cho trường hợp "~"
+                                                    if (productImageUrl.StartsWith("~"))
+                                                    {
+                                                        productImageUrl = Url.Content(productImageUrl);
+                                                    }
+                                                }
+                                                <img src="@productImageUrl" alt="@item.ProductName" loading="lazy" onerror="this.src='@Url.Content("~/Content/images/default-product.png")'">
+                                            </div>
+                                            <div class="item-details">
+                                                <h4>@item.ProductName</h4>
+                                                <div class="item-meta">
+                                                    @if (!string.IsNullOrEmpty(item.Color))
+                                                    {
+                                                        <span>Màu: @item.Color</span>
+                                                    }
+                                                    @if (!string.IsNullOrEmpty(item.Size))
+                                                    {
+                                                        <span>Size: @item.Size</span>
+                                                    }
+                                                </div>
+                                                <div class="item-price">
+                                                    <span class="quantity">@item.Quantity ×</span>
+                                                    <span class="price">@item.UnitPrice.ToString("N0")<u>đ</u></span>
+                                                    <span class="total-price ms-auto">@item.TotalPrice.ToString("N0")<u>đ</u></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+
+                                @if (!string.IsNullOrEmpty(Model.CustomerNotes))
+                                {
+                                    <div class="customer-notes mt-4 pt-4 border-top">
+                                        <h5>Ghi chú:</h5>
+                                        <p class="text-muted mb-0">@Model.CustomerNotes</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Action buttons -->
+                        <div class="action-area">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <a href="@Url.Action("Index", "Home", new { area = "User" })" class="btn btn-back w-100">
+                                        <i class="bi bi-arrow-left"></i>
+                                        Về trang chủ
+                                    </a>
+                                </div>
+                                <div class="col-md-4">
+                                    <a href="@Url.Action("MyOrders", "Order", new { area = "User" })" class="btn btn-account w-100">
+                                        <span>Xem trong tài khoản</span>
+                                        <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 d-grid gap-2">
+                                    @if (status == "pending" || status == "processing")
+                                    {
+                                        <button type="button" class="btn btn-outline-danger w-100 btn-user-cancel" data-id="@Model.Id" data-order="@Model.OrderNumber">
+                                            <i class="bi bi-x-circle me-1"></i>Hủy đơn hàng
+                                        </button>
+                                    }
+                                    @if (status == "cancelled")
+                                    {
+                                        <button type="button" class="btn btn-outline-primary w-100 btn-user-reorder" data-id="@Model.Id" data-order="@Model.OrderNumber">
+                                            <i class="bi bi-arrow-counterclockwise me-1"></i>Đặt lại
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section><!-- /Order Confirmation Section -->
+</main>
+
+@Html.AntiForgeryToken()
+
+@section scripts {
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Toastr -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script>
+        toastr.options = {
+            closeButton: true,
+            progressBar: true,
+            positionClass: "toast-top-right",
+            timeOut: 3000
+        };
+
+        // Disable AOS on this page to prevent janky animations
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof AOS !== 'undefined') {
+                AOS.init({
+                    disable: true
+                });
+            }
+            
+            // Debounce scroll events to prevent jank
+            let scrollTimeout;
+            const originalScrollTop = window.toggleScrollTop;
+            if (typeof originalScrollTop === 'function') {
+                window.removeEventListener('scroll', originalScrollTop);
+                window.addEventListener('scroll', function() {
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(function() {
+                        if (originalScrollTop) originalScrollTop();
+                    }, 10);
+                }, { passive: true });
+            }
+        });
+
+        // Confirm received
+        document.addEventListener('DOMContentLoaded', function () {
+            const btnConfirm = document.getElementById('btnConfirmReceived');
+            if (!btnConfirm) return;
+
+            btnConfirm.addEventListener('click', function () {
+                if (btnConfirm.disabled) return;
+                const original = btnConfirm.innerHTML;
+                btnConfirm.disabled = true;
+                btnConfirm.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Đang gửi...';
+
+                $.ajax({
+                    url: '@Url.Action("ConfirmReceived", "Order", new { area = "User", id = Model.Id })',
+                    type: 'POST',
+                    data: {
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (resp) {
+                        if (resp && resp.success) {
+                            if (typeof toastr !== 'undefined' && toastr.success) {
+                                toastr.success(resp.message || 'Cảm ơn bạn đã xác nhận!');
+                            } else {
+                                alert(resp.message || 'Cảm ơn bạn đã xác nhận!');
+                            }
+                            setTimeout(function () { location.reload(); }, 800);
+                        } else {
+                            if (typeof toastr !== 'undefined' && toastr.error) {
+                                toastr.error(resp && resp.message ? resp.message : 'Không thể xác nhận.');
+                            } else {
+                                alert(resp && resp.message ? resp.message : 'Không thể xác nhận.');
+                            }
+                        }
+                    },
+                    error: function () {
+                        if (typeof toastr !== 'undefined' && toastr.error) {
+                            toastr.error('Có lỗi xảy ra. Vui lòng thử lại.');
+                        } else {
+                            alert('Có lỗi xảy ra. Vui lòng thử lại.');
+                        }
+                    },
+                    complete: function () {
+                        btnConfirm.disabled = false;
+                        btnConfirm.innerHTML = original;
+                    }
+                });
+            });
+        });
+
+        // User cancel order
+        document.addEventListener('DOMContentLoaded', function () {
+            $(document).on('click', '.btn-user-cancel', function () {
+                var orderId = $(this).data('id');
+                var orderNumber = $(this).data('order');
+
+                Swal.fire({
+                    title: 'Hủy đơn hàng?',
+                    html: `<p>Bạn có chắc muốn hủy đơn <strong>${orderNumber}</strong>?</p>
+                           <input type="text" id="cancelReason" class="swal2-input" placeholder="Lý do hủy (không bắt buộc)">`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="bi bi-x-circle me-1"></i>Hủy đơn',
+                    cancelButtonText: 'Quay lại',
+                    preConfirm: () => document.getElementById('cancelReason').value
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '@Url.Action("Cancel", "Order", new { area = "User" })',
+                            type: 'POST',
+                            data: {
+                                id: orderId,
+                                reason: result.value,
+                                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                            },
+                            success: function (res) {
+                                if (res.success) {
+                                    toastr.success(res.message || 'Đơn hàng đã được hủy');
+                                    setTimeout(() => location.reload(), 800);
+                                } else {
+                                    toastr.error(res.message || 'Không thể hủy đơn');
+                                }
+                            },
+                            error: function () {
+                                toastr.error('Có lỗi xảy ra, vui lòng thử lại');
+                            }
+                        });
+                    }
+                });
+            });
+        });
+
+        // User reorder
+        document.addEventListener('DOMContentLoaded', function () {
+            $(document).on('click', '.btn-user-reorder', function () {
+                var orderId = $(this).data('id');
+                var orderNumber = $(this).data('order');
+
+                Swal.fire({
+                    title: 'Đặt lại đơn?',
+                    html: `<p>Thêm lại sản phẩm từ đơn <strong>${orderNumber}</strong> vào giỏ hàng.</p>`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#0d6efd',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="bi bi-arrow-counterclockwise me-1"></i>Đặt lại',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '@Url.Action("Reorder", "Order", new { area = "User" })',
+                            type: 'POST',
+                            data: {
+                                id: orderId,
+                                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                            },
+                            success: function (res) {
+                                if (res.success) {
+                                    toastr.success(res.message || 'Đã thêm lại sản phẩm vào giỏ');
+                                    if (res.redirect) {
+                                        setTimeout(() => window.location.href = res.redirect, 800);
+                                    } else {
+                                        setTimeout(() => location.reload(), 800);
+                                    }
+                                } else {
+                                    toastr.error(res.message || 'Không thể đặt lại đơn');
+                                }
+                            },
+                            error: function () {
+                                toastr.error('Có lỗi xảy ra, vui lòng thử lại');
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+    <style>
+        /* Disable all transitions/animations on confirm page for smoother experience */
+        #order-confirmation * {
+            animation: none !important;
+            transition: none !important;
+            will-change: auto !important;
+            transform: none !important;
+        }
+        
+        /* Optimize rendering */
+        #order-confirmation {
+            contain: layout style paint;
+            transform: translateZ(0);
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+        }
+        
+        /* Keep only necessary transitions for user interactions */
+        #order-confirmation .card-header:hover,
+        #order-confirmation .btn:hover,
+        #order-confirmation .help-link:hover {
+            transition: opacity 0.2s ease !important;
+        }
+        
+        /* Prevent layout shifts from images */
+        #order-confirmation .item-image img {
+            display: block;
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+        }
+    </style>
+}

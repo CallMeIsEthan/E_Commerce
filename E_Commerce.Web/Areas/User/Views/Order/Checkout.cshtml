@@ -1,0 +1,553 @@
+@model E_Commerce.Web.ViewModels.CheckoutViewModel
+@{
+    ViewBag.Title = "Thanh toán";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+    var cart = ViewBag.Cart as E_Commerce.Dto.CartDto;
+}
+
+<main class="main">
+
+    <!-- Page Title -->
+    <div class="page-title light-background">
+        <div class="container d-lg-flex justify-content-between align-items-center">
+            <h1 class="mb-2 mb-lg-0">Thanh toán</h1>
+            <nav class="breadcrumbs">
+                <ol>
+                    <li><a href="@Url.Action("Index", "Home", new { area = "User" })">Trang chủ</a></li>
+                    <li><a href="@Url.Action("Index", "Cart", new { area = "User" })">Giỏ hàng</a></li>
+                    <li class="current">Thanh toán</li>
+                </ol>
+            </nav>
+        </div>
+    </div><!-- End Page Title -->
+
+    <!-- Checkout Section -->
+    <section id="checkout" class="checkout section">
+
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+            <div class="row">
+                <div class="col-lg-7">
+                    <!-- Checkout Form -->
+                    <div class="checkout-container" data-aos="fade-up">
+                        <form class="checkout-form" id="checkoutForm" method="post" action="@Url.Action("Checkout", "Order", new { area = "User" })">
+                            @Html.AntiForgeryToken()
+                            @Html.HiddenFor(m => m.DiscountCodeId)
+
+                            <!-- Customer Information -->
+                            <div class="checkout-section" id="customer-info">
+                                <div class="section-header">
+                                    <div class="section-number">1</div>
+                                    <h3>Thông tin khách hàng</h3>
+                                </div>
+                                <div class="section-content">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.ShippingName, new { @class = "form-label" })
+                                        @Html.TextBoxFor(m => m.ShippingName, new { @class = "form-control", placeholder = "Nhập họ và tên" })
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.ShippingPhone, new { @class = "form-label" })
+                                        @Html.TextBoxFor(m => m.ShippingPhone, new { @class = "form-control", type = "tel", placeholder = "Nhập số điện thoại" })
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Shipping Address -->
+                            <div class="checkout-section" id="shipping-address">
+                                <div class="section-header">
+                                    <div class="section-number">2</div>
+                                    <h3>Địa chỉ giao hàng</h3>
+                                </div>
+                                <div class="section-content">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.ShippingAddress, new { @class = "form-label" })
+                                        @Html.TextAreaFor(m => m.ShippingAddress, new { @class = "form-control", rows = "3", placeholder = "Nhập địa chỉ giao hàng đầy đủ" })
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Payment Method -->
+                            <div class="checkout-section" id="payment-method">
+                                <div class="section-header">
+                                    <div class="section-number">3</div>
+                                    <h3>Phương thức thanh toán</h3>
+                                </div>
+                                <div class="section-content">
+                                    <div class="payment-options">
+                                        <div class="payment-option active">
+                                            @Html.RadioButtonFor(m => m.PaymentMethod, "COD", new { id = "cod", @checked = "checked", @class = "payment-radio" })
+                                            <label for="cod">
+                                                <span class="payment-icon"><i class="bi bi-cash"></i></span>
+                                                <span class="payment-label">Thanh toán khi nhận hàng (COD)</span>
+                                            </label>
+                                        </div>
+                                        <div class="payment-option">
+                                            @Html.RadioButtonFor(m => m.PaymentMethod, "BankTransfer", new { id = "bank-transfer", @class = "payment-radio" })
+                                            <label for="bank-transfer">
+                                                <span class="payment-icon"><i class="bi bi-bank"></i></span>
+                                                <span class="payment-label">Chuyển khoản ngân hàng</span>
+                                            </label>
+                                        </div>
+                                        <div class="payment-option">
+                                            @Html.RadioButtonFor(m => m.PaymentMethod, "CreditCard", new { id = "credit-card", @class = "payment-radio" })
+                                            <label for="credit-card">
+                                                <span class="payment-icon"><i class="bi bi-credit-card-2-front"></i></span>
+                                                <span class="payment-label">Thẻ tín dụng</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="payment-details" id="cod-details">
+                                        <p class="payment-info">Bạn sẽ thanh toán bằng tiền mặt khi nhận được hàng.</p>
+                                    </div>
+
+                                    <div class="payment-details d-none" id="bank-transfer-details">
+                                        <p class="payment-info">Vui lòng chuyển khoản vào tài khoản ngân hàng. Thông tin tài khoản sẽ được gửi qua email sau khi đặt hàng.</p>
+                                    </div>
+
+                                    <div class="payment-details d-none" id="credit-card-details">
+                                        <p class="payment-info">Thanh toán bằng thẻ tín dụng/ghi nợ. Thông tin thẻ sẽ được mã hóa và bảo mật.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Order Review -->
+                            <div class="checkout-section" id="order-review">
+                                <div class="section-header">
+                                    <div class="section-number">4</div>
+                                    <h3>Xem lại & Đặt hàng</h3>
+                                </div>
+                                <div class="section-content">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.CustomerNotes, new { @class = "form-label" })
+                                        @Html.TextAreaFor(m => m.CustomerNotes, new { @class = "form-control", rows = "2", placeholder = "Ghi chú về đơn hàng của bạn..." })
+                                    </div>
+                                    <div class="form-check terms-check">
+                                        @Html.CheckBoxFor(m => m.AcceptTerms, new { @class = "form-check-input", @id = "AcceptTerms", required = "required" })
+                                        <label class="form-check-label" for="AcceptTerms">
+                                            Tôi đồng ý với <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Điều khoản dịch vụ</a> và <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Chính sách bảo mật</a>
+                                        </label>
+                                    </div>
+                                    <div class="place-order-container">
+                                        <button type="submit" class="btn btn-primary place-order-btn" id="btnPlaceOrder">
+                                            <span class="btn-text">Đặt hàng</span>
+                                            <span class="btn-price">@(cart != null ? cart.FinalTotal.ToString("N0") : "0")<u>đ</u></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <!-- Order Summary -->
+                    <div class="order-summary" data-aos="fade-left" data-aos-delay="200">
+                        <div class="order-summary-header">
+                            <h3>Tóm tắt đơn hàng</h3>
+                            <span class="item-count">@(cart != null && cart.CartItems != null ? cart.CartItems.Count : 0) Sản phẩm</span>
+                        </div>
+
+                        <div class="order-summary-content">
+                            <div class="order-items">
+                                @if (cart != null && cart.CartItems != null && cart.CartItems.Any())
+                                {
+                                    foreach (var item in cart.CartItems)
+                                    {
+                                        <div class="order-item">
+                                            <div class="order-item-image">
+                                                <img src="@item.ProductImage" alt="@item.ProductName" class="img-fluid">
+                                            </div>
+                                            <div class="order-item-details">
+                                                <h4>@item.ProductName</h4>
+                                                @if (!string.IsNullOrEmpty(item.Size) || !string.IsNullOrEmpty(item.Color))
+                                                {
+                                                    <p class="order-item-variant">
+                                                        @if (!string.IsNullOrEmpty(item.Size))
+                                                        {<text>Size: @item.Size</text>}
+                                                        @if (!string.IsNullOrEmpty(item.Color))
+                                                        {<text>@(!string.IsNullOrEmpty(item.Size) ? " | " : "")Màu: @item.Color</text>}
+                                                    </p>
+                                                }
+                                                <div class="order-item-price">
+                                                    <span class="quantity">@item.Quantity ×</span>
+                                                    <span class="price">@item.UnitPrice.ToString("N0")<u>đ</u></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+
+                            <!-- Discount Code Section -->
+                            <div class="discount-code-section mb-3 pb-3 border-bottom">
+                                <label class="form-label mb-2 fw-semibold">Mã giảm giá</label>
+                                <div class="input-group">
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="discountCodeInput" 
+                                           placeholder="Nhập mã giảm giá"
+                                           autocomplete="off">
+                                    <button class="btn btn-dark" type="button" id="applyDiscountBtn">
+                                        Áp dụng
+                                    </button>
+                                </div>
+                                <div id="discountCodeMessage" class="mt-2 small"></div>
+                            </div>
+
+                            <div class="order-totals">
+                                @if (cart != null)
+                                {
+                                    <div class="order-subtotal d-flex justify-content-between">
+                                        <span>Tạm tính</span>
+                                        <span id="subtotal">@cart.TotalAmount.ToString("N0")<u>đ</u></span>
+                                    </div>
+                                    <div class="order-shipping d-flex justify-content-between">
+                                        <span>Phí vận chuyển</span>
+                                        <span id="shippingFee">
+                                            @if (cart.ShippingFee == 0)
+                                            {
+                                                <span class="text-success">Miễn phí</span>
+                                            }
+                                            else
+                                            {
+                                                <text>@cart.ShippingFee.ToString("N0")<u>đ</u></text>
+                                            }
+                                        </span>
+                                    </div>
+                                    <div class="order-tax d-flex justify-content-between">
+                                        <span>Thuế VAT (10%)</span>
+                                        <span id="taxAmount">@cart.TaxAmount.ToString("N0")<u>đ</u></span>
+                                    </div>
+                                    <div class="order-total d-flex justify-content-between">
+                                        <span>Tổng cộng</span>
+                                        <span id="totalAmount">@cart.FinalTotal.ToString("N0")<u>đ</u></span>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="secure-checkout">
+                                <div class="secure-checkout-header">
+                                    <i class="bi bi-shield-lock"></i>
+                                    <span>Thanh toán an toàn</span>
+                                </div>
+                                <div class="payment-icons">
+                                    <i class="bi bi-credit-card-2-front"></i>
+                                    <i class="bi bi-credit-card"></i>
+                                    <i class="bi bi-cash"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terms and Privacy Modals -->
+            <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="termsModalLabel">Điều khoản dịch vụ</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Điều khoản dịch vụ của chúng tôi được cập nhật thường xuyên. Vui lòng đọc kỹ trước khi đặt hàng.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Đã hiểu</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="privacyModalLabel">Chính sách bảo mật</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Chúng tôi cam kết bảo vệ thông tin cá nhân của bạn. Mọi thông tin sẽ được mã hóa và bảo mật tuyệt đối.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Đã hiểu</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </section><!-- /Checkout Section -->
+
+</main>
+
+@section scripts {
+<script>
+    $(document).ready(function() {
+        // Ensure toastr is configured
+        if (typeof toastr !== 'undefined') {
+            toastr.options = {
+                closeButton: true,
+                progressBar: true,
+                timeOut: 3000,
+                positionClass: "toast-top-right",
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut",
+                preventDuplicates: false
+            };
+            
+            // Test toastr is working
+            console.log('Toastr loaded successfully');
+        } else {
+            console.error('Toastr is not loaded!');
+        }
+
+        // Discount code handling
+        var appliedDiscountCode = null;
+        var appliedDiscountAmount = 0;
+
+        $('#applyDiscountBtn').on('click', function () {
+            var discountCode = $('#discountCodeInput').val().trim();
+            if (!discountCode) {
+                $('#discountCodeMessage').html('<span class="text-dark">Vui lòng nhập mã giảm giá</span>');
+                return;
+            }
+
+            var $btn = $(this);
+            $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+
+            // Tính tổng tiền hiện tại
+            var subtotal = parseFloat($('#subtotal').text().replace(/[^\d]/g, '')) || 0;
+
+            $.ajax({
+                url: '@Url.Action("ValidateDiscountCode", "Order", new { area = "User" })',
+                type: 'POST',
+                data: {
+                    code: discountCode,
+                    totalAmount: subtotal,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function (response) {
+                    if (response.success && response.discountCode) {
+                        appliedDiscountCode = response.discountCode;
+                        appliedDiscountAmount = response.discountAmount || 0;
+                        
+                        // Lưu DiscountCodeId vào hidden field
+                        $('#DiscountCodeId').val(response.discountCode.Id);
+                        
+                        // Show success
+                        $('#discountCodeInput').addClass('is-valid').removeClass('is-invalid');
+                        $('#discountCodeMessage').html('<span class="text-dark"><i class="bi bi-check-circle"></i> ' + response.message + '</span>');
+                        $btn.html('Đã áp dụng').prop('disabled', true).removeClass('btn-dark').addClass('btn-secondary');
+                        
+                        // Update order summary với discount
+                        updateOrderSummaryWithDiscount(response);
+                    } else {
+                        $('#discountCodeInput').addClass('is-invalid').removeClass('is-valid');
+                        $('#discountCodeMessage').html('<span class="text-dark">' + (response.message || 'Mã giảm giá không hợp lệ') + '</span>');
+                        $btn.html('Áp dụng').prop('disabled', false).removeClass('btn-secondary').addClass('btn-dark');
+                    }
+                },
+                error: function () {
+                    $('#discountCodeInput').addClass('is-invalid').removeClass('is-valid');
+                    $('#discountCodeMessage').html('<span class="text-dark">Có lỗi xảy ra, vui lòng thử lại</span>');
+                    $btn.html('Áp dụng').prop('disabled', false).removeClass('btn-secondary').addClass('btn-dark');
+                }
+            });
+        });
+
+        // Allow removing discount code
+        $('#discountCodeInput').on('input', function () {
+            if ($(this).val().trim() === '' && appliedDiscountCode) {
+                appliedDiscountCode = null;
+                appliedDiscountAmount = 0;
+                $('#DiscountCodeId').val('');
+                $('#discountCodeInput').removeClass('is-valid is-invalid');
+                $('#discountCodeMessage').empty();
+                $('#applyDiscountBtn').html('Áp dụng').prop('disabled', false).removeClass('btn-secondary').addClass('btn-dark');
+                $('#discountItem').hide();
+                
+                // Recalculate without discount
+                var subtotal = parseFloat($('#subtotal').text().replace(/[^\d]/g, '')) || 0;
+                var shippingFee = parseFloat($('#shippingFee').text().replace(/[^\d]/g, '')) || 0;
+                if ($('#shippingFee').find('.text-success').length > 0) {
+                    shippingFee = 0;
+                }
+                var taxAmount = (subtotal + shippingFee) * 0.1;
+                var finalTotal = subtotal + shippingFee + taxAmount;
+                $('#taxAmount').html(parseInt(taxAmount).toLocaleString('vi-VN') + '<u>đ</u>');
+                $('#totalAmount').html(parseInt(finalTotal).toLocaleString('vi-VN') + '<u>đ</u>');
+                $('.btn-price').html(parseInt(finalTotal).toLocaleString('vi-VN') + '<u>đ</u>');
+            }
+        });
+
+        function updateOrderSummaryWithDiscount(response) {
+            var subtotal = parseFloat($('#subtotal').text().replace(/[^\d]/g, '')) || 0;
+            var discountAmount = response.discountAmount || 0;
+            var shippingFee = parseFloat($('#shippingFee').text().replace(/[^\d]/g, '')) || 0;
+            if ($('#shippingFee').find('.text-success').length > 0) {
+                shippingFee = 0;
+            }
+            
+            // Show discount
+            $('#discountItem').show();
+            $('#discountAmount').html('-' + parseInt(discountAmount).toLocaleString('vi-VN') + '<u>đ</u>');
+            
+            // Recalculate tax on (subtotal - discount + shipping)
+            var taxAmount = (subtotal - discountAmount + shippingFee) * 0.1;
+            var finalTotal = subtotal - discountAmount + shippingFee + taxAmount;
+            
+            $('#taxAmount').html(parseInt(taxAmount).toLocaleString('vi-VN') + '<u>đ</u>');
+            $('#totalAmount').html(parseInt(finalTotal).toLocaleString('vi-VN') + '<u>đ</u>');
+            $('.btn-price').html(parseInt(finalTotal).toLocaleString('vi-VN') + '<u>đ</u>');
+        }
+
+        // Handle payment method change
+        $('input[name="PaymentMethod"]').on('change', function() {
+            $('.payment-option').removeClass('active');
+            $(this).closest('.payment-option').addClass('active');
+            
+            $('.payment-details').addClass('d-none');
+            var method = $(this).val().toLowerCase().replace(' ', '-');
+            if (method === 'banktransfer') method = 'bank-transfer';
+            if (method === 'creditcard') method = 'credit-card';
+            $('#' + method + '-details').removeClass('d-none');
+        });
+
+        // Handle form submit
+        $('#checkoutForm').on('submit', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            var $btn = $('#btnPlaceOrder');
+            var $form = $(this);
+
+                // Validate accept terms
+                if (!$('#AcceptTerms').is(':checked')) {
+                    if (typeof toastr !== 'undefined' && typeof toastr.warning === 'function') {
+                        toastr.warning('Vui lòng đồng ý với Điều khoản và Chính sách bảo mật');
+                    } else {
+                        alert('Vui lòng đồng ý với Điều khoản và Chính sách bảo mật');
+                    }
+                    return false;
+                }
+
+            // Disable button
+            $btn.prop('disabled', true);
+            $btn.find('.btn-text').html('<span class="spinner-border spinner-border-sm me-2"></span>Đang xử lý...');
+
+            // Serialize form data
+            var formData = $form.serialize();
+            
+            // Log form data for debugging
+            console.log('=== CHECKOUT FORM DATA ===');
+            console.log('Serialized Form Data:', formData);
+            console.log('Form Values:', {
+                ShippingName: $form.find('[name="ShippingName"]').val(),
+                ShippingPhone: $form.find('[name="ShippingPhone"]').val(),
+                ShippingAddress: $form.find('[name="ShippingAddress"]').val(),
+                PaymentMethod: $form.find('[name="PaymentMethod"]:checked').val(),
+                CustomerNotes: $form.find('[name="CustomerNotes"]').val()
+            });
+            
+            // ShippingFee and TaxAmount from Model (for display only, backend uses cart values)
+            var shippingFee = parseFloat('@Model.ShippingFee.ToString(System.Globalization.CultureInfo.InvariantCulture)');
+            var taxAmount = parseFloat('@Model.TaxAmount.ToString(System.Globalization.CultureInfo.InvariantCulture)');
+            console.log('ShippingFee from Model:', shippingFee);
+            console.log('TaxAmount from Model:', taxAmount);
+            
+            // Add ShippingFee and TaxAmount (though backend uses cart values)
+            formData += '&ShippingFee=' + shippingFee;
+            formData += '&TaxAmount=' + taxAmount;
+            
+            console.log('Final Form Data:', formData);
+
+            $.ajax({
+                url: '@Url.Action("Checkout", "Order", new { area = "User" })',
+                type: 'POST',
+                data: formData,
+                dataType: 'json',
+                success: function(response) {
+                    console.log('Checkout response:', response);
+                    console.log('Response type:', typeof response);
+                    console.log('Response success value:', response ? response.success : 'no response');
+                    console.log('Response success type:', response ? typeof response.success : 'no response');
+                    console.log('Response orderId:', response ? response.orderId : 'no response');
+                    
+                    // Re-enable button first
+                    $btn.prop('disabled', false);
+                    $btn.find('.btn-text').text('Đặt hàng');
+                    
+                    // Check if response is valid and success is strictly true
+                    // Must have: response exists, success === true (boolean), and orderId exists
+                    if (response && 
+                        typeof response.success !== 'undefined' && 
+                        response.success === true && 
+                        response.orderId) {
+                        // Success - show toast and redirect
+                        console.log('Order successful, redirecting...');
+                        if (typeof toastr !== 'undefined' && typeof toastr.success === 'function') {
+                            toastr.success(response.message || 'Đặt hàng thành công!');
+                        } else {
+                            alert(response.message || 'Đặt hàng thành công!');
+                        }
+                        setTimeout(function() {
+                            window.location.href = '@Url.Action("Confirm", "Order", new { area = "User" })?id=' + response.orderId;
+                        }, 1500);
+                    } else {
+                        // Error - show error message (including validation errors)
+                        console.log('Order failed or validation error');
+                        var errorMsg = 'Đặt hàng thất bại! Vui lòng thử lại.';
+                        if (response && response.message) {
+                            errorMsg = response.message;
+                        }
+                        if (typeof toastr !== 'undefined' && typeof toastr.error === 'function') {
+                            toastr.error(errorMsg);
+                        } else {
+                            alert(errorMsg);
+                        }
+                        // DON'T redirect on error - stay on checkout page
+                        return false;
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Checkout error:', status, error, xhr);
+                    
+                    // Re-enable button
+                    $btn.prop('disabled', false);
+                    $btn.find('.btn-text').text('Đặt hàng');
+                    
+                    var message = 'Có lỗi xảy ra! Vui lòng thử lại.';
+                    
+                    // Try to get error message from response
+                    if (xhr.responseJSON) {
+                        if (xhr.responseJSON.message) {
+                            message = xhr.responseJSON.message;
+                        } else if (xhr.responseJSON.success === false) {
+                            message = xhr.responseJSON.message || 'Đặt hàng thất bại!';
+                        }
+                    } else if (xhr.responseText) {
+                        try {
+                            var errorResponse = JSON.parse(xhr.responseText);
+                            if (errorResponse.message) {
+                                message = errorResponse.message;
+                            }
+                        } catch(e) {
+                            console.error('Error parsing response:', e);
+                        }
+                    }
+                    
+                    // Show error toast
+                    if (typeof toastr !== 'undefined' && typeof toastr.error === 'function') {
+                        toastr.error(message);
+                    } else {
+                        alert(message);
+                    }
+                }
+            });
+        });
+    });
+</script>
+}
